@@ -14,5 +14,5 @@ A simple image service using Node.js, Express, GraphicsMagick, and OpenCV.
 |Environment Variable||
 |:---|:---|
 |`POINTR_PORT`|Defaults to `3000`. The port to run the service on.|
-|`POINTR_SHARED_KEYS`|A **space-delimited** list of shared secret keys to prevent DDOS.|
+|`POINTR_SHARED_KEYS`|A **space-delimited** list of shared secret keys to prevent spamming of service.|
 |`POINTR_ALLOW_UNSAFE`|Defaults to `0` (false). Whether to allow unsafe requests (those without a key).|
