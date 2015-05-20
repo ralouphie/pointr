@@ -38,7 +38,7 @@ The format looks like the following:
 
 `<operation_name>:<param1>,<param2>,...`
 
-|Name|Short Name|Parameters|Description|
+|Name|Short&nbsp;Name|Parameters|Description|
 |:---|:---|:---|:---|
 |`crop`|`c`|`width,height,x,y`|Crop the image to the given size, offset.| 
 |`flip`|`p`|`direction`|Flip the image along the given direction (`h` for horizontal or `v` for vertical).|
