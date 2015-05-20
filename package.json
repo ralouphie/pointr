@@ -1,6 +1,6 @@
 {
   "name": "pointr",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Ralph Khattar <ralph.khattar@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -8,7 +8,6 @@
     "express": "^4.12.4",
     "gm": "^1.17.0",
     "opencv": "^3.0.0",
-    "request": "^2.55.0",
-    "segfault-handler": "^0.2.4"
+    "request": "^2.55.0"
   }
 }
