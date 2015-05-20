@@ -43,8 +43,7 @@ module.exports = function (worker) {
 				}
 			}
 
-			function handleImageError(e) {
-				work.complete();
+			function sendError(e) {
 				res.status(e.statusCode || 500).json({
 					error: true,
 					errorType: e.type || null,
@@ -52,9 +51,20 @@ module.exports = function (worker) {
 				});
 			}
 
-			function handleImageComplete(image) {
+			function handleImageError(e) {
 				work.complete();
-				image.stream().pipe(res);
+				sendError(e);
+			}
+
+			function handleImageComplete(context) {
+				work.complete();
+				if (req.query.data) {
+					res.json(context.operationsRawData || null);
+				} else if (context.image) {
+					context.image.stream().pipe(res);
+				} else {
+					sendError(new Error('No image returned'));
+				}
 			}
 
 			imageReq.on('error', handleImageError);
