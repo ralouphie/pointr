@@ -6,6 +6,8 @@ var app = express();
 var processor = require('./lib/processor');
 var workQueue = require('./lib/work-queue')(1);
 
+app.set('port', (process.env.PORT || 3000));
+
 app.get(/^\/([a-z0-9]+)\/(.+)\/(https?:\/\/.+)/, function handleImageRequest(req, res) {
 	workQueue.post(function (work) {
 
@@ -34,4 +36,6 @@ app.get(/^\/([a-z0-9]+)\/(.+)\/(https?:\/\/.+)/, function handleImageRequest(req
 	});
 });
 
-app.listen(3000);
+app.listen(app.get('port'), function() {
+	console.log('pointr is running on port', app.get('port'));
+});
