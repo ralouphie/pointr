@@ -38,11 +38,67 @@ The format looks like the following:
 
 `<operation_name>:<param1>,<param2>,...`
 
-|Name|Short&nbsp;Name|Parameters|Description|
-|:---|:---|:---|:---|
-|`crop`|`c`|`width,height,x,y`|Crop the image to the given size, offset.| 
-|`flip`|`p`|`direction`|Flip the image along the given direction (`h` for horizontal or `v` for vertical).|
-|`focal`|`f`|`auto|<detection_list>`|Set the focal point for the image based on detection algorithms. The list can contain `face`, `eye`, `eyeglasses`, `full_body`, `car_site`, `interesting_points`.|
-|`thumb`|`t`|`width,height`|Create a thumbnail for the given size (takes the focal point into consideration).|
-|`resize`|`r`|`width,height,option`|Resize the image to the given size.|
-|`rotate`|`o`|`degrees[,background]`|Rotate the image the given degrees. Can optionally provide a background color.|
+#### `crop` (`c`)
+
+Crop the image to the given size, offset.
+
+```
+http://<pointr_service>/crop:<width>,<height>,<x>,<y>/<image_url>
+
+http://<pointr_service>/crop:300,500,30,30/<image_url>
+```
+
+#### `flip` (`p`)
+
+Flip the image along the given direction (`h` for horizontal or `v` for vertical).
+
+```
+http://<pointr_service>/flip:<direction>/<image_url>
+
+http://<pointr_service>/flip:v/<image_url>
+http://<pointr_service>/p:h/<image_url>
+```
+
+#### `focal` (`f`)
+
+Set the focal point for the image based on detection algorithms. The list can contain `face`, `eye`, `eyeglasses`, `full_body`, `car_side`, `interesting_points`.
+
+```
+http://<pointr_service>/focal:<detection_list>/<image_url>
+
+http://<pointr_service>/focal:auto/<image_url>
+http://<pointr_service>/f:face,car_side,eye/<image_url>
+```
+
+#### `thumb` (`t`)
+
+Create a thumbnail for the given size (takes the focal point into consideration).
+
+```
+http://<pointr_service>/thumb:<width>,<height>/<image_url>
+
+http://<pointr_service>/thumb:500,300/<image_url>
+http://<pointr_service>/t:600,250/<image_url>
+```
+
+#### `resize` (`r`)
+
+Resize the image to the given size.
+
+```
+http://<pointr_service>/resize:<width>,<height>[,<option>]/<image_url>
+
+http://<pointr_service>/resize:500,300/<image_url>
+http://<pointr_service>/r:600,250,!/<image_url>
+```
+
+#### `rotate` (`o`)
+
+Resize the image to the given size.
+
+```
+http://<pointr_service>/rotate:<degrees>[,<background>]/<image_url>
+
+http://<pointr_service>/rotate:60/<image_url>
+http://<pointr_service>/o:45,ccc/<image_url>
+```
