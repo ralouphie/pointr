@@ -1,41 +1,12 @@
-var express = require('express');
-var request = require('request');
-var gm = require('gm');
+var cluster = require('cluster');
+var expressCluster = require('express-cluster');
+var app = require('./app');
+var cores = require('os').cpus().length;
+var minimumInstances = 16;
 
-var app = express();
-var processor = require('./lib/processor');
-var workQueue = require('./lib/work-queue')(1);
+var instances = +process.env.POINTR_INSTANCES || Math.max(minimumInstances, cores);
+if (cluster.isMaster) {
+	console.log('Starting pointr. Spawning ' + instances + ' instances...');
+}
 
-app.set('port', (process.env.PORT || 3000));
-
-app.get(/^\/([a-z0-9]+)\/(.+)\/(https?:\/\/.+)/, function handleImageRequest(req, res) {
-	workQueue.post(function (work) {
-
-		var key = req.params[0];
-		var operations = req.params[1];
-		var imageUrl = req.params[2];
-		var imageReq = request.get(imageUrl);
-		var imageGm = gm(imageReq);
-
-		function handleImageError(e) {
-			work.complete();
-			res.status(e.statusCode || 500).json({
-				error: true,
-				errorType: e.type || null,
-				errorMessage : e.message || null
-			});
-		}
-
-		function handleImageComplete(image) {
-			work.complete();
-			image.stream().pipe(res);
-		}
-
-		imageReq.on('error', handleImageError);
-		processor(operations, imageGm).catch(handleImageError).then(handleImageComplete);
-	});
-});
-
-app.listen(app.get('port'), function() {
-	console.log('pointr is running on port', app.get('port'));
-});
+expressCluster(app, { count: instances });
