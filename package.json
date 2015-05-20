@@ -1,5 +1,5 @@
 {
-  "name": "placer",
+  "name": "pointr",
   "version": "1.0.0",
   "author": "Ralph Khattar <ralph.khattar@gmail.com>",
   "license": "MIT",
@@ -7,7 +7,8 @@
     "bluebird": "^2.9.25",
     "express": "^4.12.4",
     "gm": "^1.17.0",
+    "opencv": "^3.0.0",
     "request": "^2.55.0",
-    "require-dir": "^0.3.0"
+    "segfault-handler": "^0.2.4"
   }
 }
