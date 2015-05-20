@@ -17,6 +17,10 @@ module.exports = function (worker) {
 
 	app.set('port', port);
 
+	app.get('/', function (req, res) {
+		res.status(200).end();
+	});
+
 	app.get(/^\/([a-z0-9]+)\/(.+)\/(https?:\/\/.+)$/, function handleImageRequest(req, res) {
 		workQueue.post(function (work) {
 
