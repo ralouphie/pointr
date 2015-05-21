@@ -82,6 +82,10 @@ module.exports = function (worker) {
 
 			function handleImageComplete(context) {
 
+				if (timers.process.start) {
+					timers.process.millis = new Date() - timers.process.start;
+				}
+
 				// If the client requested just the data, return it as JSON.
 				// Otherwise stream the image back to the client.
 				if (req.query.data) {
@@ -101,7 +105,6 @@ module.exports = function (worker) {
 					}
 
 					// Send the timers back as headers.
-					timers.process.millis = new Date() - timers.process.start;
 					Object.keys(timers).forEach(function (timerKey) {
 						var millis = timers[timerKey].millis;
 						res.set('x-pointr-timer-' + timerKey, (millis === null ? '?' : millis));
