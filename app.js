@@ -15,6 +15,8 @@ module.exports = function (worker) {
 	var workQueue = require('./lib/work-queue')(1);
 	var verifySignature = require('./lib/verify-signature');
 
+	app.disable('x-powered-by');
+
 	app.set('port', port);
 
 	app.get('/', function (req, res) {
@@ -24,11 +26,33 @@ module.exports = function (worker) {
 	app.get(/^\/([a-z0-9]+)\/(.+)\/(https?:\/\/.+)$/, function handleImageRequest(req, res) {
 		workQueue.post(function (work) {
 
+			var timers = {
+				download: { start: new Date(), millis: null },
+				process: { start: null, millis: null }
+			};
+
 			var signature = req.params[0];
 			var operations = req.params[1];
 			var imageUrl = req.params[2];
 			var imageReq = request.get(imageUrl);
 			var imageGm = gm(imageReq);
+
+			var responseHeaders;
+			var responseHeadersToCopy = [
+				'content-type',
+				'last-modified',
+				'cache-control'
+			];
+
+			imageReq.on('response', function(response) {
+				responseHeaders = response.headers;
+			});
+
+			imageReq.on('end', function () {
+				var now = new Date();
+				timers.download.millis = now - timers.download.start;
+				timers.process.start = now;
+			});
 
 			if (signature === 'unsafe') {
 				if (!allowUnsafe) {
@@ -52,23 +76,48 @@ module.exports = function (worker) {
 			}
 
 			function handleImageError(e) {
-				work.complete();
 				sendError(e);
+				work.complete();
 			}
 
 			function handleImageComplete(context) {
-				work.complete();
+
+				// If the client requested just the data, return it as JSON.
+				// Otherwise stream the image back to the client.
 				if (req.query.data) {
-					res.json(context.operationsRawData || null);
+					res.json({
+						timers: timers,
+						operations: context.operationsRawData || null
+					});
 				} else if (context.image) {
+
+					// Copy the response headers.
+					if (responseHeaders) {
+						responseHeadersToCopy.forEach(function (header) {
+							if (responseHeaders[header]) {
+								res.set(header, responseHeaders[header]);
+							}
+						});
+					}
+
+					// Send the timers back as headers.
+					timers.process.millis = new Date() - timers.process.start;
+					Object.keys(timers).forEach(function (timerKey) {
+						var millis = timers[timerKey].millis;
+						res.set('x-pointr-timer-' + timerKey, (millis === null ? '?' : millis));
+					});
+
 					context.image.stream().pipe(res);
+
 				} else {
 					sendError(new Error('No image returned'));
 				}
+
+				work.complete();
 			}
 
 			imageReq.on('error', handleImageError);
-			processor(operations, imageGm).catch(handleImageError).then(handleImageComplete);
+			processor(operations, imageGm).then(handleImageComplete).catch(handleImageError);
 		});
 	});
 
