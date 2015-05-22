@@ -19,6 +19,12 @@ module.exports = function (worker) {
 
 	app.set('port', port);
 
+	app.use(function(req, res, next) {
+		res.set('Access-Control-Allow-Origin', '*');
+		res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+		next();
+	});
+
 	app.get('/', function (req, res) {
 		res.status(200).end();
 	});
