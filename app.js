@@ -8,23 +8,28 @@ function regexQuote(str) {
 	return (str + '').replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
 }
 
-function buildHostRegex(whiteListFile) {
-	if (whiteListFile) {
-		var hostWhiteListText = fs.readFileSync(whiteListFile, { encoding: 'utf8' });
-		var regexParts = [];
-		hostWhiteListText.split(/\n+/).forEach(function (host) {
-			host.toLowerCase().trim();
-			if (!host.match(/^\#*/)) {
-				var wildcard = !!host.match(/^\*+\.*/);
-				host = host.replace(/\*+/, '').replace(/^\.+/, '');
-				if (host) {
-					regexParts.push((wildcard ? '.*' : '') + regexQuote(host));
-				}
+function getHostList(file) {
+	var hosts = [];
+	if (file && fs.existsSync(file)) {
+		var text = fs.readFileSync(file, { encoding: 'utf8' });
+		text.split(/\n+/).forEach(function (host) {
+			host = host.toLowerCase().trim();
+			if (!host.match(/^\#+/i)) {
+				hosts.push(host);
 			}
 		});
-		if (regexParts.length) {
-			return '(' + regexParts.join(')|(') + ')';
-		}
+	}
+	return hosts;
+}
+
+function buildHostRegex(hosts) {
+	if (hosts && hosts.length) {
+		var regexParts = hosts.map(function (host) {
+			var wildcard = !!host.match(/^\*+\.*/);
+			host = host.replace(/\*+/, '').replace(/^\.+/, '');
+			return (wildcard ? '.*' : '') + regexQuote(host);
+		});
+		return '(' + regexParts.join(')|(') + ')';
 	}
 	return null;
 }
@@ -38,8 +43,21 @@ module.exports = function (worker) {
 		return !!item;
 	});
 
-	var hostWhiteListExpr = buildHostRegex(hostWhiteListFile);
-	var hostWhiteListRegex = hostWhiteListExpr && new RegExp('^' + hostWhiteListExpr + '$', 'i');
+	var hostWhiteListRegex = null;
+	if (hostWhiteListFile) {
+		var hostWhiteListItems = getHostList(hostWhiteListFile);
+		if (worker.id === 1) {
+			if (hostWhiteListItems && hostWhiteListItems.length) {
+				hostWhiteListItems.forEach(function (pattern) {
+					console.log('[whitelist] ' + pattern);
+				});
+			} else {
+				console.log('[empty-or-invalid-whitelist]');
+			}
+		}
+		var hostWhiteListExpr = buildHostRegex(hostWhiteListItems);
+		hostWhiteListRegex = hostWhiteListExpr && new RegExp('^' + hostWhiteListExpr + '$', 'i');
+	}
 
 	var app = express();
 	var processor = require('./lib/processor');
@@ -177,6 +195,6 @@ module.exports = function (worker) {
 	});
 
 	app.listen(port, function () {
-		console.log('pointr worker ' + worker.id + ' is running on port', app.get('port'));
+		console.log('[pointr-worker] ' + worker.id + ', port', app.get('port'));
 	});
 };
