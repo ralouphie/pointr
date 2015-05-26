@@ -1,6 +1,6 @@
 {
   "name": "pointr",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "author": "Ralph Khattar <ralph.khattar@gmail.com>",
   "license": "MIT",
   "dependencies": {
