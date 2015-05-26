@@ -1,14 +1,45 @@
 var express = require('express');
 var request = require('request');
 var gm = require('gm');
+var url = require('url');
+var fs = require('fs');
+
+function regexQuote(str) {
+	return (str + '').replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+}
+
+function buildHostRegex(whiteListFile) {
+	if (whiteListFile) {
+		var hostWhiteListText = fs.readFileSync(whiteListFile, { encoding: 'utf8' });
+		var regexParts = [];
+		hostWhiteListText.split(/\n+/).forEach(function (host) {
+			host.toLowerCase().trim();
+			if (!host.match(/^\#*/)) {
+				var wildcard = !!host.match(/^\*+\.*/);
+				host = host.replace(/\*+/, '').replace(/^\.+/, '');
+				if (host) {
+					regexParts.push((wildcard ? '.*' : '') + regexQuote(host));
+				}
+			}
+		});
+		if (regexParts.length) {
+			return '(' + regexParts.join(')|(') + ')';
+		}
+	}
+	return null;
+}
 
 module.exports = function (worker) {
 
 	var port = process.env.POINTR_PORT || 3000;
 	var allowUnsafe = !!process.env.POINTR_ALLOW_UNSAFE;
+	var hostWhiteListFile = process.env.POINTR_DOMAIN_WHITELIST_FILE;
 	var keys = (process.env.POINTR_SHARED_KEYS || '').split(/\s+/).filter(function (item) {
 		return !!item;
 	});
+
+	var hostWhiteListExpr = buildHostRegex(hostWhiteListFile);
+	var hostWhiteListRegex = hostWhiteListExpr && new RegExp('^' + hostWhiteListExpr + '$', 'i');
 
 	var app = express();
 	var processor = require('./lib/processor');
@@ -60,16 +91,31 @@ module.exports = function (worker) {
 				timers.process.start = now;
 			});
 
-			if (signature === 'unsafe') {
-				if (!allowUnsafe) {
-					return handleImageError(new Error('Cannot request unsafe URL'));
+
+			// Check if the domain is white-listed.
+			var whiteListed = false;
+			if (hostWhiteListRegex) {
+				var imageUrlParts = url.parse(imageUrl);
+				if (imageUrlParts && imageUrlParts.hostname && imageUrlParts.hostname.match(hostWhiteListRegex)) {
+					whiteListed = true;
 				}
-			} else {
-				if (!keys.length) {
-					return handleImageError(new Error('No keys provided in configuration'));
-				}
-				if (!verifySignature(signature, operations + '/' + imageUrl, keys)) {
-					return handleImageError(new Error('Invalid signature'));
+			}
+
+			// If the domain is not white-listed, see if the signature is valid.
+			if (!whiteListed) {
+				if (signature === 'white') {
+					return handleImageError(new Error('Cannot request non-whitelisted URL'));
+				} else if (signature === 'unsafe') {
+					if (!allowUnsafe) {
+						return handleImageError(new Error('Cannot request unsafe URL'));
+					}
+				} else {
+					if (!keys.length) {
+						return handleImageError(new Error('No keys provided in configuration'));
+					}
+					if (!verifySignature(signature, operations + '/' + imageUrl, keys)) {
+						return handleImageError(new Error('Invalid signature'));
+					}
 				}
 			}
 
