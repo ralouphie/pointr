@@ -129,6 +129,9 @@ module.exports = function (worker) {
 
 	// Error handler.
 	app.use(function(err, req, res, next) {
+		if (!err.publicMessage) {
+			log.error(err.message || 'Unknown error', err);
+		}
 		req.workComplete && req.workComplete();
 		res.status(err.statusCode || 500).json({
 			error: true,

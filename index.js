@@ -1,6 +1,7 @@
 var cluster = require('cluster');
 var expressCluster = require('express-cluster');
 var app = require('./app');
+var log = require('./lib/log');
 var config = require('./lib/config');
 
 // Determine the number of instances to run.
@@ -11,6 +12,6 @@ var instances = Math.max(instancesMin, Math.min(instancesMax, cores));
 
 // Start clustered instances.
 if (cluster.isMaster) {
-	console.log('Starting pointr. Spawning ' + instances + ' instances...');
+	log.info('Starting pointr. Spawning ' + instances + ' instances...');
 }
 expressCluster(app, { count: instances });
