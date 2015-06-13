@@ -20,7 +20,6 @@ clients:
 
   demo:
     unsafe: true
-    rateLimit: none
     rateLimit: { by: ip, max: 10, perHours: 1 }
 
   amp:
