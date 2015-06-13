@@ -1,0 +1,60 @@
+
+# Required. The port for the service to run on.
+port: 3000
+
+# Optional. A list of valid hostnames for the service.
+# This is useful if you want to hide the origin hostname (e.g. s3cr3th0s1.example.com).
+validHostnames:
+  - localhost
+
+# Optional. The number of pointr instances to run.
+# This will default to the number of CPUs on the system bounded by the min and max.
+instances:
+  min: 16
+  max: 64
+
+# Recommended. The header to use focr the client IP address.
+# This is necessary if this service is an origin,
+# fronted by a CDN that provides its own header for the client IP address.
+# For example, Akamai provides a "True-Client-IP" header.
+ipHeader: True-Client-IP
+
+# Recommended. The rate limiter to use.
+# The rate limiter should have a type (key) to a set of options.
+rateLimiter:
+
+  # Use a redis rate limiter.
+  redis:
+    # Required. The host where the redis instance lives.
+    host: localhost
+    # Required. The port the redis instance is running on.
+    port: 6379
+    # Optional. The redis password.
+    # pass: 3x@mp13
+
+# The set of clients that will be using the service.
+# Each client is a key to a set of options for that client.
+clients:
+
+  # A demo client. A unsafe, rate limited client for demo purposes.
+  demo:
+    # Allow requests without a signature.
+    unsafe: true
+    # Rate limit by end-client (browser) IP; allow 10 reqs per hour.
+    rateLimit: { by: ip, max: 10, perHours: 1 }
+
+  # An example of an internal tool that has no rate limit
+  # because the secret key is not exposed.
+  internal_tool:
+    # Use this secret key for generating signatures.
+    secret: "@01%M3d1@%P1@7f0rm%C@n%D01t"
+    # No rate limit.
+    rateLimit: none
+
+  # An example of a client that has a secret in addition to a
+  # rate limit.
+  mobile:
+    # Use this secret key for generating signatures.
+    secret: "M0b1l3*1m@g3*R351z1ng!"
+    # Rate limit by end-client (browser) IP; allow 1000 reqs per hour.
+    rateLimit: { by: ip, max: 1000, perHours: 1 }
