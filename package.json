@@ -3,9 +3,9 @@
   "version": "1.5.1",
   "author": "Ralph Khattar <ralph.khattar@gmail.com>",
   "license": "MIT",
-	"scripts": {
-		"start": "bin/pointr"
-	},
+  "scripts": {
+    "start": "bin/pointr"
+  },
   "dependencies": {
     "bluebird": "^2.9.25",
     "express": "^4.12.4",
