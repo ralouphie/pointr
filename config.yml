@@ -1,0 +1,33 @@
+
+port: 3000
+
+validHostnames:
+  - dims-origin-a3cf9012d3c3989867ad46bc5775f86a.elasticbeanstalk.com
+
+instances:
+  min: 16
+  max: 64
+
+ipHeader: True-Client-IP
+
+rateLimiter:
+
+  redis:
+    host: localhost
+    port: 6379
+
+clients:
+
+  demo:
+    unsafe: true
+    rateLimit: none
+    rateLimit: { by: ip, max: 10, perHours: 1 }
+
+  amp:
+    secret: "@01%M3d1@%P1@7f0rm%C@n%D01t"
+    secret: testing
+    rateLimit: none
+
+  mobile:
+    secret: "M0b1l3*1m@g3*R351z1ng!"
+    rateLimit: { by: ip, max: 1000, perHours: 1 }

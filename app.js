@@ -3,198 +3,141 @@ var request = require('request');
 var gm = require('gm');
 var url = require('url');
 var fs = require('fs');
-
-function regexQuote(str) {
-	return (str + '').replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
-}
-
-function getHostList(file) {
-	var hosts = [];
-	if (file && fs.existsSync(file)) {
-		var text = fs.readFileSync(file, { encoding: 'utf8' });
-		text.split(/\n+/).forEach(function (host) {
-			host = host.toLowerCase().trim();
-			if (!host.match(/^\#+/i)) {
-				hosts.push(host);
-			}
-		});
-	}
-	return hosts;
-}
-
-function buildHostRegex(hosts) {
-	if (hosts && hosts.length) {
-		var regexParts = hosts.map(function (host) {
-			var wildcard = !!host.match(/^\*+\.*/);
-			host = host.replace(/\*+/, '').replace(/^\.+/, '');
-			return (wildcard ? '.*' : '') + regexQuote(host);
-		});
-		return '(' + regexParts.join(')|(') + ')';
-	}
-	return null;
-}
+var morgan = require('morgan');
+var errors = require('./lib/errors');
+var config = require('./lib/config');
+var Timers = require('./lib/timers');
+var authorize = require('./lib/authorize');
+var log = require('./lib/log');
 
 module.exports = function (worker) {
 
-	var port = process.env.POINTR_PORT || 3000;
-	var allowUnsafe = !!process.env.POINTR_ALLOW_UNSAFE;
-	var hostWhiteListFile = process.env.POINTR_DOMAIN_WHITELIST_FILE;
-	var keys = (process.env.POINTR_SHARED_KEYS || '').split(/\s+/).filter(function (item) {
-		return !!item;
-	});
-
-	var hostWhiteListRegex = null;
-	if (hostWhiteListFile) {
-		var hostWhiteListItems = getHostList(hostWhiteListFile);
-		if (worker.id === 1) {
-			if (hostWhiteListItems && hostWhiteListItems.length) {
-				hostWhiteListItems.forEach(function (pattern) {
-					console.log('[whitelist] ' + pattern);
-				});
-			} else {
-				console.log('[empty-or-invalid-whitelist]');
-			}
-		}
-		var hostWhiteListExpr = buildHostRegex(hostWhiteListItems);
-		hostWhiteListRegex = hostWhiteListExpr && new RegExp('^' + hostWhiteListExpr + '$', 'i');
-	}
-
+	var port = config.port || 3000;
 	var app = express();
 	var processor = require('./lib/processor');
 	var workQueue = require('./lib/work-queue')(1);
-	var verifySignature = require('./lib/verify-signature');
 
 	app.disable('x-powered-by');
 
 	app.set('port', port);
 
+	// Logging middleware.
+	app.use(morgan('combined', { stream: log.stream }));
+
+	// CORS middleware.
 	app.use(function(req, res, next) {
 		res.set('Access-Control-Allow-Origin', '*');
 		res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 		next();
 	});
 
+	// Server heartbeat route.
 	app.get('/', function (req, res) {
 		res.status(200).end();
 	});
 
-	app.get(/^\/([a-z0-9]+)\/(.+)\/(https?:\/\/.+)$/, function handleImageRequest(req, res) {
+	// Image processing route.
+	app.get(/^\/([a-zA-Z0-9_]+)(:[a-z0-9]+)?\/(.+)\/(https?:\/\/.+)$/, function handleImageRequest(req, res, next) {
 		workQueue.post(function (work) {
 
-			var timers = {
-				download: { start: new Date(), millis: null },
-				process: { start: null, millis: null }
+			req.workComplete = function () {
+				req.workComplete = function () { };
+				work.complete();
 			};
+			req.params.client = req.params[0];
+			req.params.signature = (req.params[1] || '').replace(/^:/, '');
+			req.params.operations = req.params[2];
+			req.params.imageUrl = req.params[3];
 
-			var signature = req.params[0];
-			var operations = req.params[1];
-			var imageUrl = req.params[2];
-			var imageReq = request.get(imageUrl);
-			var imageGm = gm(imageReq);
+			// Authorize the current request.
+			authorize(req, res, function (e) {
 
-			var responseHeaders;
-			var responseHeadersToCopy = [
-				'content-type',
-				'last-modified',
-				'cache-control'
-			];
-
-			imageReq.on('response', function(response) {
-				responseHeaders = response.headers;
-			});
-
-			imageReq.on('end', function () {
-				var now = new Date();
-				timers.download.millis = now - timers.download.start;
-				timers.process.start = now;
-			});
-
-
-			// Check if the domain is white-listed.
-			var whiteListed = false;
-			if (hostWhiteListRegex) {
-				var imageUrlParts = url.parse(imageUrl);
-				if (imageUrlParts && imageUrlParts.hostname && imageUrlParts.hostname.match(hostWhiteListRegex)) {
-					whiteListed = true;
+				if (e) {
+					return next(e);
 				}
-			}
 
-			// If the domain is not white-listed, see if the signature is valid.
-			if (!whiteListed) {
-				if (signature === 'white') {
-					return handleImageError(new Error('Cannot request non-whitelisted URL'));
-				} else if (signature === 'unsafe') {
-					if (!allowUnsafe) {
-						return handleImageError(new Error('Cannot request unsafe URL'));
-					}
-				} else {
-					if (!keys.length) {
-						return handleImageError(new Error('No keys provided in configuration'));
-					}
-					if (!verifySignature(signature, operations + '/' + imageUrl, keys)) {
-						return handleImageError(new Error('Invalid signature'));
-					}
-				}
-			}
+				var timers = new Timers();
+				timers.start('download');
 
-			function sendError(e) {
-				res.status(e.statusCode || 500).json({
-					error: true,
-					errorType: e.type || null,
-					errorMessage: e.message || null
+				var imageReq = request.get(req.params.imageUrl);
+				var imageGm = gm(imageReq);
+
+				var responseHeaders;
+				var responseHeadersToCopy = [
+					'content-type',
+					'last-modified',
+					'cache-control'
+				];
+
+				imageReq.on('response', function(response) {
+					responseHeaders = response.headers;
 				});
-			}
 
-			function handleImageError(e) {
-				sendError(e);
-				work.complete();
-			}
+				imageReq.on('end', function () {
+					timers.stop('download');
+					timers.start('process');
+				});
 
-			function handleImageComplete(context) {
-
-				if (timers.process.start) {
-					timers.process.millis = new Date() - timers.process.start;
+				function handleImageError(e) {
+					req.workComplete();
+					next(e);
 				}
 
-				// If the client requested just the data, return it as JSON.
-				// Otherwise stream the image back to the client.
-				if (req.query.data) {
-					res.json({
-						timers: timers,
-						operations: context.operationsRawData || null
-					});
-				} else if (context.image) {
+				function handleImageComplete(context) {
 
-					// Copy the response headers.
-					if (responseHeaders) {
-						responseHeadersToCopy.forEach(function (header) {
-							if (responseHeaders[header]) {
-								res.set(header, responseHeaders[header]);
-							}
+					timers.stop('process');
+
+					// If the client requested just the data, return it as JSON.
+					// Otherwise stream the image back to the client.
+					if (req.query.data) {
+						res.json({
+							timers: timers,
+							operations: context.operationsRawData || null
 						});
+					} else if (context.image) {
+
+						// Copy the response headers.
+						if (responseHeaders) {
+							responseHeadersToCopy.forEach(function (header) {
+								if (responseHeaders[header]) {
+									res.set(header, responseHeaders[header]);
+								}
+							});
+						}
+
+						// Send the timers back as headers.
+						Object.keys(timers).forEach(function (timerKey) {
+							var millis = timers[timerKey].millis;
+							res.set('x-pointr-timer-' + timerKey, (millis === null ? '?' : millis));
+						});
+
+						context.image.stream().pipe(res);
+
+					} else {
+						next(new errors.NoImageReturned('No image returned'));
 					}
 
-					// Send the timers back as headers.
-					Object.keys(timers).forEach(function (timerKey) {
-						var millis = timers[timerKey].millis;
-						res.set('x-pointr-timer-' + timerKey, (millis === null ? '?' : millis));
-					});
-
-					context.image.stream().pipe(res);
-
-				} else {
-					sendError(new Error('No image returned'));
+					req.workComplete();
 				}
 
-				work.complete();
-			}
+				imageReq.on('error', handleImageError);
+				processor(req.params.operations, imageGm).then(handleImageComplete).catch(handleImageError);
 
-			imageReq.on('error', handleImageError);
-			processor(operations, imageGm).then(handleImageComplete).catch(handleImageError);
+			});
+		});
+	});
+
+	// Error handler.
+	app.use(function(err, req, res, next) {
+		req.workComplete && req.workComplete();
+		res.status(err.statusCode || 500).json({
+			error: true,
+			errorType: err.type || null,
+			errorMessage: err.publicMessage || 'Internal Server Error'
 		});
 	});
 
 	app.listen(port, function () {
-		console.log('[pointr-worker] ' + worker.id + ', port', app.get('port'));
+		log.info('[pointr-worker] ' + worker.id + ', port', app.get('port'));
 	});
 };

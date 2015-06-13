@@ -8,7 +8,14 @@
     "express": "^4.12.4",
     "express-cluster": "0.0.3",
     "gm": "^1.17.0",
+    "hiredis": "^0.4.0",
+    "js-yaml": "^3.3.1",
+    "morgan": "^1.6.0",
+    "ms": "^0.7.1",
     "opencv": "^3.0.0",
-    "request": "^2.55.0"
+    "ratelimiter": "^2.0.1",
+    "redis": "^0.12.1",
+    "request": "^2.55.0",
+    "winston": "^1.0.0"
   }
 }
