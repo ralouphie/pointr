@@ -47,7 +47,7 @@ clients:
   # because the secret key is not exposed.
   internal_tool:
     # Use this secret key for generating signatures.
-    secret: "@01%M3d1@%P1@7f0rm%C@n%D01t"
+    secret: "1nt3rn@lT00l"
     # No rate limit.
     rateLimit: none
 
