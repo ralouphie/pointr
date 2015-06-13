@@ -22,7 +22,7 @@ clients:
     unsafe: true
     rateLimit: { by: ip, max: 10, perHours: 1 }
 
-  amp:
+  internal_tool:
     secret: "@01%M3d1@%P1@7f0rm%C@n%D01t"
     secret: testing
     rateLimit: none
