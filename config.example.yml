@@ -1,5 +1,5 @@
 
-# Required. The port for the service to run on.
+# Optional. Defaults to 3000. The port for the service to run on.
 port: 3000
 
 # Optional. A list of valid hostnames for the service.
@@ -13,7 +13,7 @@ instances:
   min: 16
   max: 64
 
-# Recommended. The header to use focr the client IP address.
+# Recommended. The header to use for the end-client (browser) IP address.
 # This is necessary if this service is an origin,
 # fronted by a CDN that provides its own header for the client IP address.
 # For example, Akamai provides a "True-Client-IP" header.

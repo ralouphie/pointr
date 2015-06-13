@@ -8,19 +8,26 @@ A simple image service using Node.js, Express, GraphicsMagick, and OpenCV.
 2. Install GraphicsMagick
 3. Install OpenCV
 4. `npm install`
+5. Create a `config.yml` based on the example
 
 ## Running
 
-`node index.js`
+`node index.js production_config.yml`
 
-### Options
+### Configuration
 
-|Environment Variable||
+Pointr uses a config file to control all options. See `config.example.yml` as an example and for more details.
+
+|Config Option||
 |:---|:---|
-|`POINTR_PORT`|Defaults to `3000`. The port to run the service on.|
-|`POINTR_SHARED_KEYS`|A **space-delimited** list of shared secret keys to prevent spamming of service.|
-|`POINTR_ALLOW_UNSAFE`|Defaults to `0` (false). Whether to allow unsafe requests (those without a key).|
-|`POINTR_INSTANCES`|Defaults to either CPU core count or 16, whichever is higher. The number of Pointr processing instances to start.|
+|`port`|Optional. Defaults to `3000`. The port to run the service on.|
+|`validHostnames`|Optional. A list of valid host names the service will respond to.|
+|`instances.min`|Optional. Defaults to `16`. The minimum number of instances to start.|
+|`instances.max`|Optional. Defaults to `128`. The maximum number of instances to start.|
+|`ipHeader`|Recommended. The header to use for the end-client (browser) IP address.|
+|`rateLimiter`|Recommended. A rate limiter to use. See `config.example.yml` for an example.|
+|`clients`|Required. The set of clients that will be using the service.|
+
 
 ## API
 
