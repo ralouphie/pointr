@@ -31,11 +31,13 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 
 ## API
 
-The Pointr API takes a **security signature**, followed by a sequence of **operations**, followed by the **image URL** to manipulate.
+The Pointr API takes a **client key**, followed by an optional **security signature** 
+(depending on whether a `secret` was configured for the application, see the configuration example),
+followed by a sequence of **operations**, followed by the **image URL** to manipulate.
 
 The format looks like the following:
 
-`http://<pointr_service_host>/<signature>/<operation1>/<operation2>/.../<image_url>`
+`http://<pointr_service_host>/<client>[:<signature>]/<operation1>/<operation2>/.../<image_url>`
 
 ### Operations
 
