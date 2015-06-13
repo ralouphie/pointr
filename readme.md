@@ -8,11 +8,11 @@ A simple image service using Node.js, Express, GraphicsMagick, and OpenCV.
 2. Install GraphicsMagick
 3. Install OpenCV
 4. `npm install`
-5. Create a `config.yml` based on the example
+5. Create a config YAML file based on the `config.example.yml`
 
 ## Running
 
-`node index.js production_config.yml`
+`bin/pointr production_config.yml`
 
 ### Configuration
 
