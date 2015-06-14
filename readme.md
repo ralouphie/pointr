@@ -118,7 +118,7 @@ The format looks like the following:
 
 `<operation_name>:<param1>,<param2>,...`
 
-#### resize (r)
+#### `resize`, `r`
 
 Resize the image to the given size.
 
@@ -135,6 +135,8 @@ http://<host>/<client:signature>/r:600,250,force/<image_url>
 |`height`|The height.|
 |`kind`|The kind of resize to perform (see below).|
 
+##### Resize Options
+
 |Options||
 |:---|:---|
 |`force`|Force the resize to the width and height specified.|
@@ -143,9 +145,13 @@ http://<host>/<client:signature>/r:600,250,force/<image_url>
 |`min`|Treat the width/height as **minimum** values instead of maximum values.|
 |`percent`|Treat the width/height as percentages.|
 
-#### thumb (t)
+#### `thumb`, `t`
 
 Create a thumbnail for the given size (takes the focal point into consideration).
+
+Thumbnails will automatically crop the image, trying to get as much in the frame as possible.  
+If not all of the image can fit, the focal point will be used as the center point for the crop while
+keeping the image within the bounds.
 
 ```
 http://<host>/<client:signature>/<client:signature>/thumb:<width>,<height>/<image_url>
@@ -154,9 +160,16 @@ http://<host>/<client:signature>/<client:signature>/thumb:500,300/<image_url>
 http://<host>/<client:signature>/<client:signature>/t:600,250/<image_url>
 ```
 
-#### crop (c)
+|Argument||
+|:---|:---|
+|`width`|The width for the thumbnail (in pixels).|
+|`height`|The height for the thumbnail (in pixels).|
 
-Crop the image to the given size, offset.
+#### `crop`, `c`
+
+Crop the image to the given size and offset.
+
+The width, height, and x and y offsets are absolute **pixel** values based on the original image.
 
 ```
 http://<host>/<client:signature>/crop:<width>,<height>,<x>,<y>/<image_url>
@@ -164,7 +177,14 @@ http://<host>/<client:signature>/crop:<width>,<height>,<x>,<y>/<image_url>
 http://<host>/<client:signature>/crop:300,500,30,30/<image_url>
 ```
 
-#### flip (p)
+|Argument||
+|:---|:---|
+|`width`|The width for the crop (in pixels).|
+|`height`|The height for the crop (in pixels).|
+|`x`|The horizontal offset for the crop from the left of the image (in pixels).|
+|`y`|The vertical offset for the crop from the top of the image (in pixels).|
+
+#### `flip`, `p`
 
 Flip the image along the given direction (`h` for horizontal or `v` for vertical).
 
@@ -175,9 +195,18 @@ http://<host>/<client:signature>/flip:v/<image_url>
 http://<host>/<client:signature>/p:h/<image_url>
 ```
 
-#### focal (foc)
+|Argument||
+|:---|:---|
+|`direction`|The direction to perform the flip (`h` for horizontal or `v` for vertical).|
 
-Set the focal point for the image based on detection algorithms. The list can contain `face`, `eye`, `eyeglasses`, `full_body`, `car_side`, `interesting_points`.
+#### `focal`, `foc`
+
+Set the focal point for the image based on detection algorithms.
+
+Specifying `auto` will use a predefined detection list. The first detection to match will be used as the focal point.  
+The list can contain `face`, `eye`, `eyeglasses`, etc. See below for the full list
+
+If the detection returns more than one match, the center of mass of all matches will be calculated and used as the center point.
 
 ```
 http://<host>/<client:signature>/focal:<detection_list>/<image_url>
@@ -186,7 +215,26 @@ http://<host>/<client:signature>/focal:auto/<image_url>
 http://<host>/<client:signature>/f:face,car_side,eye/<image_url>
 ```
 
-#### rotate (o)
+|Argument||
+|:---|:---|
+|`detection_list`|A comma-delimited list of detection algorithms to check. Uses the first one that matches.|
+
+
+`face`, `eye`, `eyeglasses`, `full_body`, `car_side`, `interesting_points`.
+
+##### Supported Detection Algorithms
+
+|Detections||
+|:---|:---|
+|`face`|Looks for frontal facial match(es).|
+|`eye`|Looks for eye match(es).|
+|`eyeglasses`|Looks for eyeglass match(es).|
+|`full_body`|Looks for full body match(es).|
+|`car_side`|Looks for car (automobile) side match(es).|
+|`interesting_points`|Looks for interesting points with good contrast.|
+
+
+#### `rotate`, `o`
 
 Resize the image to the given angle.
 
@@ -197,7 +245,12 @@ http://<host>/<client:signature>/rotate:60/<image_url>
 http://<host>/<client:signature>/o:45,ccc/<image_url>
 ```
 
-#### format (f)
+|Argument||
+|:---|:---|
+|`degrees`|The angle to use for the image rotation in degrees (`0` to `360`).|
+|`background`|The background color to use for empty space (if any). This should be a hex color, such as `f00` (red) or `00ff00` (green).|
+
+#### `format`, `f`
 
 Set the output format for the image.
 
@@ -208,6 +261,10 @@ http://<host>/<client:signature>/f:jpg/<image_url>
 http://<host>/<client:signature>/f:png/<image_url>
 ```
 
+|Argument||
+|:---|:---|
+|`image_format`|The format for the image image (see below for all supported formats).|
+
 ##### Supported Image Formats
 
 |Format||
@@ -216,10 +273,13 @@ http://<host>/<client:signature>/f:png/<image_url>
 |`png`|Portable Network Graphics (PNG)|
 |`gif`|CompuServe Graphics Interchange Format (GIF)|
 |`bmp`|Microsoft Windows Bitmap|
+|`tiff`|Tagged Image File Format|
 
-#### quality (q)
+#### `quality`, `q`
 
 Set the quality for the image being output. Lower quality images reduce download size.
+
+Quality can only be set if the image **format** is one of `jpg`, `png`, or `tiff`.
 
 ```
 http://<host>/<client:signature>/quality:<percent>/<image_url>
@@ -227,3 +287,7 @@ http://<host>/<client:signature>/quality:<percent>/<image_url>
 http://<host>/<client:signature>/quality:35/<image_url>
 http://<host>/<client:signature>/q:85/<image_url>
 ```
+
+|Argument||
+|:---|:---|
+|`percent`|The quality percent (`0` to `100`).|
