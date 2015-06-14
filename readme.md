@@ -2,6 +2,13 @@
 
 A simple image service using Node.js, Express, GraphicsMagick, and OpenCV.
 
+## What's it do?
+
+- (Re)sizing, cropping
+- Image formatting (JPG, PNG, ...)
+- Reduce quality (for fast downloads)
+- Filters (brightness, hue, contrast, blur, ...)
+
 ## Installation
 
 1. Install Node.js
