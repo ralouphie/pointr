@@ -123,21 +123,35 @@ The format looks like the following:
 Resize the image to the given size.
 
 ```
-http://<pointr_service>/resize:<width>,<height>[,<option>]/<image_url>
+http://<host>/<client:signature>/resize:<width>,<height>[,<options>]/<image_url>
 
-http://<pointr_service>/resize:500,300/<image_url>
-http://<pointr_service>/r:600,250,!/<image_url>
+http://<host>/<client:signature>/resize:500,300/<image_url>
+http://<host>/<client:signature>/r:600,250,force/<image_url>
 ```
+
+|Argument||
+|:---|:---|
+|`width`|The width.|
+|`height`|The height.|
+|`kind`|The kind of resize to perform (see below).|
+
+|Options||
+|:---|:---|
+|`force`|Force the resize to the width and height specified.|
+|`shrink`|Only resize the image if it will shrink.|
+|`grow`|Only resize the image if it will grow.|
+|`min`|Treat the width/height as **minimum** values instead of maximum values.|
+|`percent`|Treat the width/height as percentages.|
 
 #### thumb (t)
 
 Create a thumbnail for the given size (takes the focal point into consideration).
 
 ```
-http://<pointr_service>/thumb:<width>,<height>/<image_url>
+http://<host>/<client:signature>/<client:signature>/thumb:<width>,<height>/<image_url>
 
-http://<pointr_service>/thumb:500,300/<image_url>
-http://<pointr_service>/t:600,250/<image_url>
+http://<host>/<client:signature>/<client:signature>/thumb:500,300/<image_url>
+http://<host>/<client:signature>/<client:signature>/t:600,250/<image_url>
 ```
 
 #### crop (c)
@@ -145,9 +159,9 @@ http://<pointr_service>/t:600,250/<image_url>
 Crop the image to the given size, offset.
 
 ```
-http://<pointr_service>/crop:<width>,<height>,<x>,<y>/<image_url>
+http://<host>/<client:signature>/crop:<width>,<height>,<x>,<y>/<image_url>
 
-http://<pointr_service>/crop:300,500,30,30/<image_url>
+http://<host>/<client:signature>/crop:300,500,30,30/<image_url>
 ```
 
 #### flip (p)
@@ -155,10 +169,10 @@ http://<pointr_service>/crop:300,500,30,30/<image_url>
 Flip the image along the given direction (`h` for horizontal or `v` for vertical).
 
 ```
-http://<pointr_service>/flip:<direction>/<image_url>
+http://<host>/<client:signature>/flip:<direction>/<image_url>
 
-http://<pointr_service>/flip:v/<image_url>
-http://<pointr_service>/p:h/<image_url>
+http://<host>/<client:signature>/flip:v/<image_url>
+http://<host>/<client:signature>/p:h/<image_url>
 ```
 
 #### focal (foc)
@@ -166,10 +180,10 @@ http://<pointr_service>/p:h/<image_url>
 Set the focal point for the image based on detection algorithms. The list can contain `face`, `eye`, `eyeglasses`, `full_body`, `car_side`, `interesting_points`.
 
 ```
-http://<pointr_service>/focal:<detection_list>/<image_url>
+http://<host>/<client:signature>/focal:<detection_list>/<image_url>
 
-http://<pointr_service>/focal:auto/<image_url>
-http://<pointr_service>/f:face,car_side,eye/<image_url>
+http://<host>/<client:signature>/focal:auto/<image_url>
+http://<host>/<client:signature>/f:face,car_side,eye/<image_url>
 ```
 
 #### rotate (o)
@@ -177,10 +191,10 @@ http://<pointr_service>/f:face,car_side,eye/<image_url>
 Resize the image to the given angle.
 
 ```
-http://<pointr_service>/rotate:<degrees>[,<background>]/<image_url>
+http://<host>/<client:signature>/rotate:<degrees>[,<background>]/<image_url>
 
-http://<pointr_service>/rotate:60/<image_url>
-http://<pointr_service>/o:45,ccc/<image_url>
+http://<host>/<client:signature>/rotate:60/<image_url>
+http://<host>/<client:signature>/o:45,ccc/<image_url>
 ```
 
 #### format (f)
@@ -188,10 +202,10 @@ http://<pointr_service>/o:45,ccc/<image_url>
 Set the output format for the image.
 
 ```
-http://<pointr_service>/format:<image_format>/<image_url>
+http://<host>/<client:signature>/format:<image_format>/<image_url>
 
-http://<pointr_service>/f:jpg/<image_url>
-http://<pointr_service>/f:png/<image_url>
+http://<host>/<client:signature>/f:jpg/<image_url>
+http://<host>/<client:signature>/f:png/<image_url>
 ```
 
 ##### Supported Image Formats
@@ -208,8 +222,8 @@ http://<pointr_service>/f:png/<image_url>
 Set the quality for the image being output. Lower quality images reduce download size.
 
 ```
-http://<pointr_service>/quality:<percent>/<image_url>
+http://<host>/<client:signature>/quality:<percent>/<image_url>
 
-http://<pointr_service>/quality:35/<image_url>
-http://<pointr_service>/q:85/<image_url>
+http://<host>/<client:signature>/quality:35/<image_url>
+http://<host>/<client:signature>/q:85/<image_url>
 ```
