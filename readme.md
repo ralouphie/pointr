@@ -118,6 +118,8 @@ The format looks like the following:
 
 `<operation_name>:<param1>,<param2>,...`
 
+- - -
+
 #### `resize`, `r`
 
 Resize the image to the given size.
@@ -145,6 +147,8 @@ http://<host>/<client:signature>/r:600,250,force/<image_url>
 |`min`|Treat the width/height as **minimum** values instead of maximum values.|
 |`percent`|Treat the width/height as percentages.|
 
+- - -
+
 #### `thumb`, `t`
 
 Create a thumbnail for the given size (takes the focal point into consideration).
@@ -165,6 +169,8 @@ http://<host>/<client:signature>/<client:signature>/t:600,250/<image_url>
 |`width`|The width for the thumbnail (in pixels).|
 |`height`|The height for the thumbnail (in pixels).|
 
+- - -
+
 #### `crop`, `c`
 
 Crop the image to the given size and offset.
@@ -184,6 +190,8 @@ http://<host>/<client:signature>/crop:300,500,30,30/<image_url>
 |`x`|The horizontal offset for the crop from the left of the image (in pixels).|
 |`y`|The vertical offset for the crop from the top of the image (in pixels).|
 
+- - -
+
 #### `flip`, `p`
 
 Flip the image along the given direction (`h` for horizontal or `v` for vertical).
@@ -198,6 +206,8 @@ http://<host>/<client:signature>/p:h/<image_url>
 |Argument||
 |:---|:---|
 |`direction`|The direction to perform the flip (`h` for horizontal or `v` for vertical).|
+
+- - -
 
 #### `focal`, `foc`
 
@@ -219,7 +229,6 @@ http://<host>/<client:signature>/f:face,car_side,eye/<image_url>
 |:---|:---|
 |`detection_list`|A comma-delimited list of detection algorithms to check. Uses the first one that matches.|
 
-
 `face`, `eye`, `eyeglasses`, `full_body`, `car_side`, `interesting_points`.
 
 ##### Supported Detection Algorithms
@@ -233,6 +242,7 @@ http://<host>/<client:signature>/f:face,car_side,eye/<image_url>
 |`car_side`|Looks for car (automobile) side match(es).|
 |`interesting_points`|Looks for interesting points with good contrast.|
 
+- - -
 
 #### `rotate`, `o`
 
@@ -249,6 +259,8 @@ http://<host>/<client:signature>/o:45,ccc/<image_url>
 |:---|:---|
 |`degrees`|The angle to use for the image rotation in degrees (`0` to `360`).|
 |`background`|The background color to use for empty space (if any). This should be a hex color, such as `f00` (red) or `00ff00` (green).|
+
+- - -
 
 #### `format`, `f`
 
@@ -274,6 +286,8 @@ http://<host>/<client:signature>/f:png/<image_url>
 |`gif`|CompuServe Graphics Interchange Format (GIF)|
 |`bmp`|Microsoft Windows Bitmap|
 |`tiff`|Tagged Image File Format|
+
+- - -
 
 #### `quality`, `q`
 
