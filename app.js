@@ -1,5 +1,6 @@
 var express = require('express');
 var request = require('request');
+var mime = require('mime');
 var gm = require('gm');
 var url = require('url');
 var fs = require('fs');
@@ -64,9 +65,7 @@ module.exports = function (worker) {
 
 				var responseHeaders;
 				var responseHeadersToCopy = [
-					'content-type',
-					'last-modified',
-					'cache-control'
+					'last-modified'
 				];
 
 				imageReq.on('response', function(response) {
@@ -95,6 +94,16 @@ module.exports = function (worker) {
 							operations: context.operationsRawData || null
 						});
 					} else if (context.image) {
+
+						// Set the content type to the mime type specified by a format operation
+						// or the response header content-type or based on the image URL file extension.
+						var contentType =
+							context.mime ||
+							responseHeaders['content-type'] ||
+							mime(req.params.imageUrl);
+						if (contentType) {
+							res.set('content-type', contentType);
+						}
 
 						// Copy the response headers.
 						if (responseHeaders) {
