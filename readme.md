@@ -135,7 +135,7 @@ http://<host>/<client:signature>/r:600,250,force/<image_url>
 |:---|:---|
 |`width`|The width.|
 |`height`|The height.|
-|`kind`|The kind of resize to perform (see below).|
+|`options`|Comma-delimited options for the resize (see below).|
 
 ##### Resize Options
 
@@ -246,7 +246,7 @@ http://<host>/<client:signature>/f:face,car_side,eye/<image_url>
 
 #### `rotate`, `o`
 
-Resize the image to the given angle.
+Rotate the image to the given angle.
 
 ```
 http://<host>/<client:signature>/rotate:<degrees>[,<background>]/<image_url>
