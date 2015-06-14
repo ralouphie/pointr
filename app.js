@@ -88,7 +88,7 @@ module.exports = function (worker) {
 
 					// If the client requested just the data, return it as JSON.
 					// Otherwise stream the image back to the client.
-					if (req.query.data) {
+					if ('undefined' !== typeof req.query.data) {
 						res.json({
 							timers: timers,
 							operations: context.operationsRawData || null
