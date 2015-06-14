@@ -176,7 +176,7 @@ http://<pointr_service>/rotate:60/<image_url>
 http://<pointr_service>/o:45,ccc/<image_url>
 ```
 
-### format (f)
+#### format (f)
 
 Set the output format for the image.
 
@@ -187,7 +187,7 @@ http://<pointr_service>/f:jpg/<image_url>
 http://<pointr_service>/f:png/<image_url>
 ```
 
-#### Supported Image Formats
+##### Supported Image Formats
 
 |Format||
 |:---|:---|
@@ -196,7 +196,7 @@ http://<pointr_service>/f:png/<image_url>
 |`gif`|CompuServe Graphics Interchange Format (GIF)|
 |`bmp`|Microsoft Windows Bitmap|
 
-### quality (q)
+#### quality (q)
 
 Set the quality for the image being output. Lower quality images reduce download size.
 
