@@ -111,50 +111,7 @@ The format looks like the following:
 
 `<operation_name>:<param1>,<param2>,...`
 
-#### `crop` (`c`)
-
-Crop the image to the given size, offset.
-
-```
-http://<pointr_service>/crop:<width>,<height>,<x>,<y>/<image_url>
-
-http://<pointr_service>/crop:300,500,30,30/<image_url>
-```
-
-#### `flip` (`p`)
-
-Flip the image along the given direction (`h` for horizontal or `v` for vertical).
-
-```
-http://<pointr_service>/flip:<direction>/<image_url>
-
-http://<pointr_service>/flip:v/<image_url>
-http://<pointr_service>/p:h/<image_url>
-```
-
-#### `focal` (`f`)
-
-Set the focal point for the image based on detection algorithms. The list can contain `face`, `eye`, `eyeglasses`, `full_body`, `car_side`, `interesting_points`.
-
-```
-http://<pointr_service>/focal:<detection_list>/<image_url>
-
-http://<pointr_service>/focal:auto/<image_url>
-http://<pointr_service>/f:face,car_side,eye/<image_url>
-```
-
-#### `thumb` (`t`)
-
-Create a thumbnail for the given size (takes the focal point into consideration).
-
-```
-http://<pointr_service>/thumb:<width>,<height>/<image_url>
-
-http://<pointr_service>/thumb:500,300/<image_url>
-http://<pointr_service>/t:600,250/<image_url>
-```
-
-#### `resize` (`r`)
+#### resize (r)
 
 Resize the image to the given size.
 
@@ -165,13 +122,87 @@ http://<pointr_service>/resize:500,300/<image_url>
 http://<pointr_service>/r:600,250,!/<image_url>
 ```
 
-#### `rotate` (`o`)
+#### thumb (t)
 
-Resize the image to the given size.
+Create a thumbnail for the given size (takes the focal point into consideration).
+
+```
+http://<pointr_service>/thumb:<width>,<height>/<image_url>
+
+http://<pointr_service>/thumb:500,300/<image_url>
+http://<pointr_service>/t:600,250/<image_url>
+```
+
+#### crop (c)
+
+Crop the image to the given size, offset.
+
+```
+http://<pointr_service>/crop:<width>,<height>,<x>,<y>/<image_url>
+
+http://<pointr_service>/crop:300,500,30,30/<image_url>
+```
+
+#### flip (p)
+
+Flip the image along the given direction (`h` for horizontal or `v` for vertical).
+
+```
+http://<pointr_service>/flip:<direction>/<image_url>
+
+http://<pointr_service>/flip:v/<image_url>
+http://<pointr_service>/p:h/<image_url>
+```
+
+#### focal (foc)
+
+Set the focal point for the image based on detection algorithms. The list can contain `face`, `eye`, `eyeglasses`, `full_body`, `car_side`, `interesting_points`.
+
+```
+http://<pointr_service>/focal:<detection_list>/<image_url>
+
+http://<pointr_service>/focal:auto/<image_url>
+http://<pointr_service>/f:face,car_side,eye/<image_url>
+```
+
+#### rotate (o)
+
+Resize the image to the given angle.
 
 ```
 http://<pointr_service>/rotate:<degrees>[,<background>]/<image_url>
 
 http://<pointr_service>/rotate:60/<image_url>
 http://<pointr_service>/o:45,ccc/<image_url>
+```
+
+### format (f)
+
+Set the output format for the image.
+
+```
+http://<pointr_service>/format:<image_format>/<image_url>
+
+http://<pointr_service>/f:jpg/<image_url>
+http://<pointr_service>/f:png/<image_url>
+```
+
+#### Supported Image Formats
+
+|Format||
+|:---|:---|
+|`jpg`|Joint Photographic Experts Group JFIF format (JPEG)|
+|`png`|Portable Network Graphics (PNG)|
+|`gif`|CompuServe Graphics Interchange Format (GIF)|
+|`bmp`|Microsoft Windows Bitmap|
+
+### quality (q)
+
+Set the quality for the image being output. Lower quality images reduce download size.
+
+```
+http://<pointr_service>/quality:<percent>/<image_url>
+
+http://<pointr_service>/quality:35/<image_url>
+http://<pointr_service>/q:85/<image_url>
 ```
