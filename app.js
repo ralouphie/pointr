@@ -17,6 +17,7 @@ module.exports = function (worker) {
 	var app = express();
 	var processor = require('./lib/processor');
 	var workQueue = require('./lib/work-queue')(1);
+	var cacheSeconds = config.cacheSeconds || 2592000; // Default cache time to 30 days.
 
 	app.disable('x-powered-by');
 
@@ -94,6 +95,9 @@ module.exports = function (worker) {
 							operations: context.operationsRawData || null
 						});
 					} else if (context.image) {
+
+						// Set the cache time for the response.
+						res.set('Cache-Control', 'Max-Age=' + cacheSeconds);
 
 						// Set the content type to the mime type specified by a format operation
 						// or the response header content-type or based on the image URL file extension.

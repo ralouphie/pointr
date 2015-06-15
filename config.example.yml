@@ -19,6 +19,10 @@ instances:
 # For example, Akamai provides a "True-Client-IP" header.
 ipHeader: True-Client-IP
 
+# How long to cache images. This will set the cache control header for the CDN.
+# Set for 30 days (2592000 seconds).
+cacheSeconds: 2592000
+
 # Recommended. The rate limiter to use.
 # The rate limiter should have a type (key) to a set of options.
 rateLimiter:
