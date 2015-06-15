@@ -31,13 +31,13 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |`validHostnames`|Optional. A list of valid host names the service will respond to.|
 |`instances.min`|Optional. Defaults to `16`. The minimum number of instances to start.|
 |`instances.max`|Optional. Defaults to `128`. The maximum number of instances to start.|
+|`cacheSeconds`|Recommended. Defaults to `2592000`. What to set the `Cache-Control` header to.|
 |`ipHeader`|Recommended. The header to use for the end-client (browser) IP address.|
 |`rateLimiter`|Recommended. A rate limiter to use. See `config.example.yml` for an example.|
 |`clients`|Required. The set of clients that will be using the service. See `config.example.yml` for an example.|
 
 #### Example Configuration
 
-```yml
 # Optional. Defaults to 3000. The port for the service to run on.
 port: 3000
 
@@ -57,6 +57,10 @@ instances:
 # fronted by a CDN that provides its own header for the client IP address.
 # For example, Akamai provides a "True-Client-IP" header.
 ipHeader: True-Client-IP
+
+# How long to cache images. This will set the cache control header for the CDN.
+# Set for 30 days (2592000 seconds).
+cacheSeconds: 2592000
 
 # Recommended. The rate limiter to use.
 # The rate limiter should have a type (key) to a set of options.
