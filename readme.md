@@ -38,6 +38,7 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 
 #### Example Configuration
 
+```yml
 # Optional. Defaults to 3000. The port for the service to run on.
 port: 3000
 
