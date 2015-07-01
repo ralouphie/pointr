@@ -49,7 +49,13 @@ module.exports = function (worker) {
 			req.params.client = req.params[0];
 			req.params.signature = (req.params[1] || '').replace(/^:/, '');
 			req.params.operations = req.params[2];
-			req.params.imageUrl = req.params[3];
+
+			// Use request URL to preserve query parameters stripped by Express.
+			var imageUrl = req.url.match(/https?:\/\/[^$]+/);
+			if (imageUrl) {
+				imageUrl = imageUrl[0];
+			}
+			req.params.imageUrl = imageUrl;
 
 			// Authorize the current request.
 			authorize(req, res, function (e) {
