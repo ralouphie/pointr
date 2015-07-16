@@ -115,6 +115,45 @@ The format looks like the following:
 
 `http://<pointr_service_host>/<client>[:<signature>]/<operation1>/<operation2>/.../<image_url>`
 
+### Signature
+
+To access the API through an unsafe client (one that uses a `secret`, see config above), you must generate a **signature**.
+
+To generate a security signature, you generate a SHA-1 HMAC (Hashed Message Authentication Code) of the operations followed by a slash `/`, followed by the image URL.
+
+Format: `<operation1>/<operation2>/.../<imageURL>`  
+Example: `thumb:300,300/flip:h/http://example.com/my-image.jpeg`
+
+If the above string of operations and image URL is `message`, The algorithm looks like the following:
+
+### Examples
+
+#### Pseudocode
+
+```
+signature = sha1_hmac_hex(clientSecret, message)
+```
+
+##### Node.js
+
+```
+var crypto = require('crypto');
+var signature = crypto.createHmac('sha1', clientSecret).update(message).digest('hex');`
+```
+
+##### PHP
+
+```
+$signature = hash_hmac('sha1', $message, $clientSecret);
+```
+
+#### Making Requests
+
+Once the signature is computed, you can make requests using the client ID and signature in the URL:
+
+`http://<pointr_service_host>/<client>:<signature>/<operation1>/<operation2>/.../<image_url>`
+
+
 ### Operations
 
 Operations contain a **name**, followed by a colon `:`, followed by a comma-delimited list of **parameters**.
@@ -130,10 +169,10 @@ The format looks like the following:
 Resize the image to the given size.
 
 ```
-http://<host>/<client:signature>/resize:<width>,<height>[,<options>]/<image_url>
+http://<host>/<client>[:<signature>]/resize:<width>,<height>[,<options>]/<image_url>
 
-http://<host>/<client:signature>/resize:500,300/<image_url>
-http://<host>/<client:signature>/r:600,250,force/<image_url>
+http://<host>/<client>[:<signature>]/resize:500,300/<image_url>
+http://<host>/<client>[:<signature>]/r:600,250,force/<image_url>
 ```
 
 |Argument||
@@ -163,10 +202,10 @@ If not all of the image can fit, the focal point will be used as the center poin
 keeping the image within the bounds.
 
 ```
-http://<host>/<client:signature>/<client:signature>/thumb:<width>,<height>/<image_url>
+http://<host>/<client>[:<signature>]/thumb:<width>,<height>/<image_url>
 
-http://<host>/<client:signature>/<client:signature>/thumb:500,300/<image_url>
-http://<host>/<client:signature>/<client:signature>/t:600,250/<image_url>
+http://<host>/<client>[:<signature>]/thumb:500,300/<image_url>
+http://<host>/<client>[:<signature>]/t:600,250/<image_url>
 ```
 
 |Argument||
@@ -183,9 +222,9 @@ Crop the image to the given size and offset.
 The width, height, and x and y offsets are absolute **pixel** values based on the original image.
 
 ```
-http://<host>/<client:signature>/crop:<width>,<height>,<x>,<y>/<image_url>
+http://<host>/<client>[:<signature>]/crop:<width>,<height>,<x>,<y>/<image_url>
 
-http://<host>/<client:signature>/crop:300,500,30,30/<image_url>
+http://<host>/<client>[:<signature>]/crop:300,500,30,30/<image_url>
 ```
 
 |Argument||
@@ -202,10 +241,10 @@ http://<host>/<client:signature>/crop:300,500,30,30/<image_url>
 Flip the image along the given direction (`h` for horizontal or `v` for vertical).
 
 ```
-http://<host>/<client:signature>/flip:<direction>/<image_url>
+http://<host>/<client>[:<signature>]/flip:<direction>/<image_url>
 
-http://<host>/<client:signature>/flip:v/<image_url>
-http://<host>/<client:signature>/p:h/<image_url>
+http://<host>/<client>[:<signature>]/flip:v/<image_url>
+http://<host>/<client>[:<signature>]/p:h/<image_url>
 ```
 
 |Argument||
@@ -224,10 +263,10 @@ The list can contain `face`, `eye`, `eyeglasses`, etc. See below for the full li
 If the detection returns more than one match, the center of mass of all matches will be calculated and used as the center point.
 
 ```
-http://<host>/<client:signature>/focal:<detection_list>/<image_url>
+http://<host>/<client>[:<signature>]/focal:<detection_list>/<image_url>
 
-http://<host>/<client:signature>/focal:auto/<image_url>
-http://<host>/<client:signature>/f:face,car_side,eye/<image_url>
+http://<host>/<client>[:<signature>]/focal:auto/<image_url>
+http://<host>/<client>[:<signature>]/f:face,car_side,eye/<image_url>
 ```
 
 |Argument||
@@ -254,10 +293,10 @@ http://<host>/<client:signature>/f:face,car_side,eye/<image_url>
 Rotate the image to the given angle.
 
 ```
-http://<host>/<client:signature>/rotate:<degrees>[,<background>]/<image_url>
+http://<host>/<client>[:<signature>]/rotate:<degrees>[,<background>]/<image_url>
 
-http://<host>/<client:signature>/rotate:60/<image_url>
-http://<host>/<client:signature>/o:45,ccc/<image_url>
+http://<host>/<client>[:<signature>]/rotate:60/<image_url>
+http://<host>/<client>[:<signature>]/o:45,ccc/<image_url>
 ```
 
 |Argument||
@@ -272,10 +311,10 @@ http://<host>/<client:signature>/o:45,ccc/<image_url>
 Set the output format for the image.
 
 ```
-http://<host>/<client:signature>/format:<image_format>/<image_url>
+http://<host>/<client>[:<signature>]/format:<image_format>/<image_url>
 
-http://<host>/<client:signature>/f:jpg/<image_url>
-http://<host>/<client:signature>/f:png/<image_url>
+http://<host>/<client>[:<signature>]/f:jpg/<image_url>
+http://<host>/<client>[:<signature>]/f:png/<image_url>
 ```
 
 |Argument||
@@ -301,10 +340,10 @@ Set the quality for the image being output. Lower quality images reduce download
 Quality can only be set if the image **format** is one of `jpg`, `png`, or `tiff`.
 
 ```
-http://<host>/<client:signature>/quality:<percent>/<image_url>
+http://<host>/<client>[:<signature>]/quality:<percent>/<image_url>
 
-http://<host>/<client:signature>/quality:35/<image_url>
-http://<host>/<client:signature>/q:85/<image_url>
+http://<host>/<client>[:<signature>]/quality:35/<image_url>
+http://<host>/<client>[:<signature>]/q:85/<image_url>
 ```
 
 |Argument||
