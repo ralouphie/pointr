@@ -63,9 +63,9 @@ ipHeader: True-Client-IP
 
 # How long to cache images. This will set the cache control header for the CDN.
 cache: 
-	ttlDefault: 2592000   # Default to 30 days (2592000 seconds).
-	ttlMin: 3600          # Minimum 1 hour (3600 seconds).
-	ttlMax: 2592000       # Maximum 30 days (2592000 seconds).
+  ttlDefault: 2592000   # Default to 30 days (2592000 seconds).
+  ttlMin: 3600          # Minimum 1 hour (3600 seconds).
+  ttlMax: 2592000       # Maximum 30 days (2592000 seconds).
 
 # Recommended. The rate limiter to use.
 # The rate limiter should have a type (key) to a set of options.
@@ -86,11 +86,11 @@ clients:
 
   # A demo client. A unsafe, rate limited client for demo purposes.
   demo:
-  	# Client-specific cache time settings.
-  	cache:
-  		ttlDefault: 3600
-  		ttlMin: 3600
-  		ttlMax: 3600
+    # Client-specific cache time settings.
+    cache:
+      ttlDefault: 3600
+      ttlMin: 3600
+      ttlMax: 3600
     # Allow requests without a signature.
     unsafe: true
     # Rate limit by end-client (browser) IP; allow 10 reqs per hour.
