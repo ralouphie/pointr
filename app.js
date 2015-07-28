@@ -105,13 +105,15 @@ module.exports = function (worker) {
 
 						// Set the cache time for the response.
 
-						var cacheResponse = +((responseHeaders['cache-control'] || '').match(/max-age=([0-9]+)/i)[1]) || null;
+						var cacheMatches  = (responseHeaders['cache-control'] || '').match(/max-age=([0-9]+)/i) || { };
+						var cacheResponse = +(cacheMatches[1] || 0);
 						var cacheClient   = clientConfig.cache     || { };
 						var cacheGlobal   = config.cache           || { };
 						var cacheDefault  = cacheClient.ttlDefault || cacheGlobal.ttlDefault || 2592000;
 						var cacheMin      = cacheClient.ttlMin     || cacheGlobal.ttlMin     || 3600;
 						var cacheMax      = cacheClient.ttlMax     || cacheGlobal.ttlMax     || 2592000;
 						var cacheFinal    = Math.max(cacheMin, Math.min(cacheMax, cacheResponse || cacheDefault));
+
 						res.set('Cache-Control', 'max-age=' + cacheFinal);
 
 						// Set the content type to the mime type specified by a format operation
