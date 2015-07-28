@@ -17,7 +17,6 @@ module.exports = function (worker) {
 	var app = express();
 	var processor = require('./lib/processor');
 	var workQueue = require('./lib/work-queue')(1);
-	var cacheSeconds = config.cacheSeconds || 2592000; // Default cache time to 30 days.
 
 	app.disable('x-powered-by');
 
@@ -49,6 +48,8 @@ module.exports = function (worker) {
 			req.params.client = req.params[0];
 			req.params.signature = (req.params[1] || '').replace(/^:/, '');
 			req.params.operations = req.params[2];
+
+			var clientConfig = (config.client && config.client[req.params.client]) || { };
 
 			// Use request URL to preserve query parameters stripped by Express.
 			var imageUrl = req.url.match(/https?:\/\/[^$]+/);
@@ -103,7 +104,15 @@ module.exports = function (worker) {
 					} else if (context.image) {
 
 						// Set the cache time for the response.
-						res.set('Cache-Control', 'Max-Age=' + cacheSeconds);
+
+						var cacheResponse = +((responseHeaders['cache-control'] || '').match(/max-age=([0-9]+)/i)[1]) || null;
+						var cacheClient   = clientConfig.cache     || { };
+						var cacheGlobal   = config.cache           || { };
+						var cacheDefault  = cacheClient.ttlDefault || cacheGlobal.ttlDefault || 2592000;
+						var cacheMin      = cacheClient.ttlMin     || cacheGlobal.ttlMin     || 3600;
+						var cacheMax      = cacheClient.ttlMax     || cacheGlobal.ttlMax     || 2592000;
+						var cacheFinal    = Math.max(cacheMin, Math.min(cacheMax, cacheResponse || cacheDefault));
+						res.set('Cache-Control', 'max-age=' + cacheFinal);
 
 						// Set the content type to the mime type specified by a format operation
 						// or the response header content-type or based on the image URL file extension.

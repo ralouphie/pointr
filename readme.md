@@ -31,7 +31,9 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |`validHostnames`|Optional. A list of valid host names the service will respond to.|
 |`instances.min`|Optional. Defaults to `16`. The minimum number of instances to start.|
 |`instances.max`|Optional. Defaults to `128`. The maximum number of instances to start.|
-|`cacheSeconds`|Recommended. Defaults to `2592000`. What to set the `Cache-Control` header to.|
+|`cache.ttlDefault`|Recommended. Defaults to `2592000` (30 days). Cache time if cache control is not present in image response.|
+|`cache.ttlMin`|Recommended. Defaults to `3600` (one hour). Minimum cache time for the `Cache-Control` header.|
+|`cache.ttlMax`|Recommended. Defaults to `2592000` (30 days). Maximum cache time for the `Cache-Control` header.|
 |`ipHeader`|Recommended. The header to use for the end-client (browser) IP address.|
 |`rateLimiter`|Recommended. A rate limiter to use. See `config.example.yml` for an example.|
 |`clients`|Required. The set of clients that will be using the service. See `config.example.yml` for an example.|
@@ -60,8 +62,10 @@ instances:
 ipHeader: True-Client-IP
 
 # How long to cache images. This will set the cache control header for the CDN.
-# Set for 30 days (2592000 seconds).
-cacheSeconds: 2592000
+cache: 
+	ttlDefault: 2592000   # Default to 30 days (2592000 seconds).
+	ttlMin: 3600          # Minimum 1 hour (3600 seconds).
+	ttlMax: 2592000       # Maximum 30 days (2592000 seconds).
 
 # Recommended. The rate limiter to use.
 # The rate limiter should have a type (key) to a set of options.
@@ -82,6 +86,11 @@ clients:
 
   # A demo client. A unsafe, rate limited client for demo purposes.
   demo:
+  	# Client-specific cache time settings.
+  	cache:
+  		ttlDefault: 3600
+  		ttlMin: 3600
+  		ttlMax: 3600
     # Allow requests without a signature.
     unsafe: true
     # Rate limit by end-client (browser) IP; allow 10 reqs per hour.
