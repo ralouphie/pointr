@@ -38,7 +38,7 @@ module.exports = function (worker) {
 	});
 
 	// Image processing route.
-	app.get(/^\/([a-zA-Z0-9_]+)(:[a-z0-9]+)?\/(.+)\/(https?:\/\/.+)$/, function handleImageRequest(req, res, next) {
+	app.get(/^\/([a-zA-Z0-9_]+)(:[a-z0-9]+)?\/(.+)\/(https?:\/\/?.+)$/, function handleImageRequest(req, res, next) {
 		workQueue.post(function (work) {
 
 			req.workComplete = function () {
@@ -52,9 +52,10 @@ module.exports = function (worker) {
 			var clientConfig = (config.client && config.client[req.params.client]) || { };
 
 			// Use request URL to preserve query parameters stripped by Express.
-			var imageUrl = req.url.match(/https?:\/\/[^$]+/);
+			var imageUrl = req.url.match(/https?:\/\/?[^$]+/);
 			if (imageUrl) {
 				imageUrl = imageUrl[0];
+				imageUrl = imageUrl.replace(/(https?):\/\/?/, '$1://');
 			}
 			req.params.imageUrl = imageUrl;
 
