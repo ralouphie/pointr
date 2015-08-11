@@ -1,6 +1,12 @@
 # Optional. Defaults to 3000. The port for the service to run on.
 port: 3000
 
+# Optional. Logging configuration
+log:
+  json: false     # Do NOT JSON logging
+  colorize: true  # Color the logs
+  level: debug    # Log level
+
 # Optional. A list of valid hostnames for the service.
 # This is useful if you want to hide the origin hostname (e.g. s3cr3th0s1.example.com).
 validHostnames:

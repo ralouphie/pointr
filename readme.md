@@ -44,6 +44,12 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 # Optional. Defaults to 3000. The port for the service to run on.
 port: 3000
 
+# Optional. Logging configuration
+log:
+  json: true      # Use JSON logging
+  colorize: false # Do not color the logs
+  level: debug    # Log level
+
 # Optional. A list of valid hostnames for the service.
 # This is useful if you want to hide the origin hostname (e.g. s3cr3th0s1.example.com).
 validHostnames:
