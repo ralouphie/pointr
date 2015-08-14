@@ -41,34 +41,39 @@ module.exports = function (worker) {
 
 	// Image processing route.
 	app.get(/^\/([a-zA-Z0-9_]+)(:[a-z0-9]+)?\/(.+)\/(https?:\/\/?.+)$/, function handleImageRequest(req, res, next) {
-		workQueue.post(function (work) {
 
-			req.workComplete = function () {
-				req.workComplete = function () { };
-				work.complete();
-			};
-			req.params.client = req.params[0];
-			req.params.signature = (req.params[1] || '').replace(/^:/, '');
-			req.params.operations = req.params[2];
+		req.params.client = req.params[0];
+		req.params.signature = (req.params[1] || '').replace(/^:/, '');
+		req.params.operations = req.params[2];
 
-			var clientConfig = (config.client && config.client[req.params.client]) || { };
+		var clientConfig = (config.client && config.client[req.params.client]) || { };
 
-			// Use request URL to preserve query parameters stripped by Express.
-			var imageUrl = req.url.match(/https?:\/\/?[^$]+/);
-			if (imageUrl) {
-				imageUrl = imageUrl[0];
-				imageUrl = imageUrl.replace(/(https?):\/\/?/, '$1://');
+		// Use request URL to preserve query parameters stripped by Express.
+		var imageUrl = req.url.match(/https?:\/\/?[^$]+/);
+		if (imageUrl) {
+			imageUrl = imageUrl[0];
+			imageUrl = imageUrl.replace(/(https?):\/\/?/, '$1://');
+		}
+		req.params.imageUrl = imageUrl;
+
+		// Authorize the current request.
+		authorize(req, res, function (e) {
+
+			if (e) {
+				return next(e);
 			}
-			req.params.imageUrl = imageUrl;
 
-			// Authorize the current request.
-			authorize(req, res, function (e) {
+			var timers = new Timers();
+			timers.start('wait');
 
-				if (e) {
-					return next(e);
-				}
+			workQueue.post(function (work) {
 
-				var timers = new Timers();
+				req.workComplete = function () {
+					req.workComplete = function () { };
+					work.complete();
+				};
+
+				timers.stop('wait');
 				timers.start('download');
 
 				var imageReq = request.get(req.params.imageUrl);
