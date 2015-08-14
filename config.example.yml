@@ -3,8 +3,8 @@ port: 3000
 
 # Optional. Logging configuration
 log:
-  json: false                 # Do NOT JSON logging
-  colorize: true              # Color the logs
+  json: true                  # Do JSON logging
+  colorize: false             # Do not colorize the output.
   level: debug                # Log level
   disableAccessLogging: false # Whether to disable access logging
 

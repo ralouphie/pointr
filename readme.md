@@ -28,8 +28,8 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |Config Option||
 |:---|:---|
 |`port`|Optional. Defaults to `3000`. The port to run the service on.|
-|`log.json`|Optional. Defaults to `false`. Whether to use JSON for output logging.|
-|`log.colorize`|Optional. Defaults to `true`. Whether to color the log.|
+|`log.json`|Optional. Defaults to `true`. Whether to use JSON for output logging.|
+|`log.colorize`|Optional. Defaults to `false`. Whether to color the log.|
 |`log.level`|Optional. Defaults to `debug`. The logging level.|
 |`log.disableAccessLogging`|Optional. Defaults to `false`. Whether to disable access logging.|
 |`validHostnames`|Optional. A list of valid host names the service will respond to.|
