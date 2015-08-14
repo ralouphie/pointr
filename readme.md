@@ -41,9 +41,6 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |`ipHeader`|Recommended. The header to use for the end-client (browser) IP address.|
 |`rateLimiter`|Recommended. A rate limiter to use. See `config.example.yml` for an example.|
 |`clients`|Required. The set of clients that will be using the service. See `config.example.yml` for an example.|
-|`cache.ttlDefault`|Optional. Defaults to 30 days (`2592000`). The default cache time for images (if one is not returned in a cache-control header).|
-|`cache.ttlMin`|Optional. Defaults to 1 hour `3600`. The minimum cache time for images.|
-|`cache.ttlMax`|Optional. Defaults to 30 days (`2592000`). The maximum cache time for images.|
 
 The `cache` configuration above can also be set per client. See the example configuration below.
 
