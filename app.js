@@ -4,7 +4,7 @@ var mime = require('mime');
 var gm = require('gm');
 var url = require('url');
 var fs = require('fs');
-var morgan = require('morgan');
+var expressWinston = require('express-winston');
 var errors = require('./lib/errors');
 var config = require('./lib/config');
 var Timers = require('./lib/timers');
@@ -23,7 +23,9 @@ module.exports = function (worker) {
 	app.set('port', port);
 
 	// Logging middleware.
-	app.use(morgan('combined', { stream: log.stream }));
+	if (!config.log || !config.log.disableAccessLogging) {
+		app.use(expressWinston.logger({ winstonInstance: log, msg: 'HTTP {{req.method}} {{req.url}}' }));
+	}
 
 	// CORS middleware.
 	app.use(function(req, res, next) {

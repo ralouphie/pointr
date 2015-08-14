@@ -28,6 +28,10 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |Config Option||
 |:---|:---|
 |`port`|Optional. Defaults to `3000`. The port to run the service on.|
+|`log.json`|Optional. Defaults to `false`. Whether to use JSON for output logging.|
+|`log.colorize`|Optional. Defaults to `true`. Whether to color the log.|
+|`log.level`|Optional. Defaults to `debug`. The logging level.|
+|`log.disableAccessLogging`|Optional. Defaults to `false`. Whether to disable access logging.|
 |`validHostnames`|Optional. A list of valid host names the service will respond to.|
 |`instances.min`|Optional. Defaults to `16`. The minimum number of instances to start.|
 |`instances.max`|Optional. Defaults to `128`. The maximum number of instances to start.|
@@ -37,6 +41,11 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |`ipHeader`|Recommended. The header to use for the end-client (browser) IP address.|
 |`rateLimiter`|Recommended. A rate limiter to use. See `config.example.yml` for an example.|
 |`clients`|Required. The set of clients that will be using the service. See `config.example.yml` for an example.|
+|`cache.ttlDefault`|Optional. Defaults to 30 days (`2592000`). The default cache time for images (if one is not returned in a cache-control header).|
+|`cache.ttlMin`|Optional. Defaults to 1 hour `3600`. The minimum cache time for images.|
+|`cache.ttlMax`|Optional. Defaults to 30 days (`2592000`). The maximum cache time for images.|
+
+The `cache` configuration above can also be set per client. See the example configuration below.
 
 #### Example Configuration
 
@@ -46,9 +55,10 @@ port: 3000
 
 # Optional. Logging configuration
 log:
-  json: true      # Use JSON logging
-  colorize: false # Do not color the logs
-  level: debug    # Log level
+  json: true                  # Use JSON logging
+  colorize: false             # Do not color the logs
+  level: debug                # Log level
+  disableAccessLogging: false # Whether to disable access logging
 
 # Optional. A list of valid hostnames for the service.
 # This is useful if you want to hide the origin hostname (e.g. s3cr3th0s1.example.com).

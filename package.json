@@ -1,6 +1,6 @@
 {
   "name": "pointr",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "author": "Ralph Khattar <ralph.khattar@gmail.com>",
   "license": "MIT",
   "scripts": {
@@ -10,11 +10,11 @@
     "bluebird": "^2.9.25",
     "express": "^4.12.4",
     "express-cluster": "0.0.3",
+    "express-winston": "^0.3.1",
     "gm": "^1.17.0",
     "hiredis": "^0.4.0",
     "js-yaml": "^3.3.1",
     "mime": "^1.3.4",
-    "morgan": "^1.6.0",
     "ms": "^0.7.1",
     "opencv": "^3.0.0",
     "ratelimiter": "^2.0.1",
