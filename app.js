@@ -76,7 +76,9 @@ module.exports = function (worker) {
 				timers.stop('wait');
 				timers.start('download');
 
-				var imageReq = request.get(req.params.imageUrl);
+				var imageReq = request.get(req.params.imageUrl, {
+					timeout: 1000 * (config.requestTimeout || 5)
+				});
 				var imageGm = gm(imageReq);
 
 				var responseHeaders;
