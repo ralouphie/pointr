@@ -35,6 +35,7 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |`validHostnames`|Optional. A list of valid host names the service will respond to.|
 |`instances.min`|Optional. Defaults to `16`. The minimum number of instances to start.|
 |`instances.max`|Optional. Defaults to `128`. The maximum number of instances to start.|
+|`requestTimeout`|Optional. Defaults to `5`. Timeout (in seconds) when requesting images.|
 |`cache.ttlDefault`|Recommended. Defaults to `2592000` (30 days). Cache time if cache control is not present in image response.|
 |`cache.ttlMin`|Recommended. Defaults to `3600` (one hour). Minimum cache time for the `Cache-Control` header.|
 |`cache.ttlMax`|Recommended. Defaults to `2592000` (30 days). Maximum cache time for the `Cache-Control` header.|
@@ -67,6 +68,9 @@ validHostnames:
 instances:
   min: 16
   max: 64
+
+# Optional. Timeout (in seconds) when requesting images.
+requestTimeout: 5
 
 # Recommended. The header to use for the end-client (browser) IP address.
 # This is necessary if this service is an origin,
