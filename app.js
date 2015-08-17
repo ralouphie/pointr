@@ -97,7 +97,11 @@ module.exports = function (worker) {
 
 				function handleImageError(e) {
 					req.workComplete();
-					next(e);
+					if (e && e.code && e.code === 'ETIMEDOUT') {
+						next(new errors.ImageRequestTimeout('Timeout requesting image'));
+					} else {
+						next(e);
+					}
 				}
 
 				function handleImageComplete(context) {
