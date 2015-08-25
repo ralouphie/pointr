@@ -143,7 +143,7 @@ The format looks like the following:
 
 ### Signature
 
-To access the API through an unsafe client (one that uses a `secret`, see config above), you must generate a **signature**.
+To access the API through an safe client (one that uses a `secret`, see config above), you must generate a **signature**.
 
 To generate a security signature, you generate a SHA-1 HMAC (Hashed Message Authentication Code) of the operations followed by a slash `/`, followed by the image URL.
 
@@ -292,7 +292,7 @@ If the detection returns more than one match, the center of mass of all matches 
 http://<host>/<client>[:<signature>]/focal:<detection_list>/<image_url>
 
 http://<host>/<client>[:<signature>]/focal:auto/<image_url>
-http://<host>/<client>[:<signature>]/f:face,car_side,eye/<image_url>
+http://<host>/<client>[:<signature>]/foc:face,car_side,eye/<image_url>
 ```
 
 |Argument||
