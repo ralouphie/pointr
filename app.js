@@ -15,6 +15,7 @@ module.exports = function (worker) {
 
 	var port = config.port || 3000;
 	var app = express();
+	var downloader = require('./lib/downloader');
 	var processor = require('./lib/processor');
 	var workQueue = require('./lib/work-queue')(1);
 
@@ -46,7 +47,7 @@ module.exports = function (worker) {
 		req.params.signature = (req.params[1] || '').replace(/^:/, '');
 		req.params.operations = req.params[2];
 
-		var clientConfig = (config.client && config.client[req.params.client]) || { };
+		var clientConfig = (config.client && config.client[req.params.client]) || {};
 
 		// Use request URL to preserve query parameters stripped by Express.
 		var imageUrl = req.url.match(/https?:\/\/?[^$]+/);
@@ -64,117 +65,119 @@ module.exports = function (worker) {
 			}
 
 			var timers = new Timers();
-			timers.start('wait');
+			var downloadOptions = {
+				timeout: 1000 * (config.requestTimeout || 5)
+			};
 
-			workQueue.post(function (work) {
+			timers.start('download');
+			downloader(req.params.imageUrl, downloadOptions).then(handleDownloadComplete).catch(handleDownloadError);
 
-				req.workComplete = function () {
-					req.workComplete = function () { };
-					work.complete();
-				};
+			function handleDownloadError(e) {
+				next(e);
+			}
 
-				timers.stop('wait');
-				timers.start('download');
+			function handleDownloadComplete(result) {
 
-				var imageReq = request.get(req.params.imageUrl, {
-					timeout: 1000 * (config.requestTimeout || 5)
-				});
-				var imageGm = gm(imageReq);
-
-				var responseHeaders;
+				var path = result.path;
+				var response = result.response;
+				var cleanup = result.cleanup;
+				var responseHeaders = response.headers;
 				var responseHeadersToCopy = [
 					'last-modified'
 				];
 
-				imageReq.on('response', function(response) {
-					responseHeaders = response.headers;
-				});
+				timers.stop('download');
+				timers.start('wait');
 
-				imageReq.on('end', function () {
-					timers.stop('download');
+				workQueue.post(function (work) {
+
+					req.workComplete = function () {
+						cleanup();
+						req.workComplete = function () { };
+						work.complete();
+					};
+
+					timers.stop('wait');
 					timers.start('process');
-				});
 
-				function handleImageError(e) {
-					req.workComplete();
-					if (e && e.code && e.code === 'ETIMEDOUT') {
-						next(new errors.ImageRequestTimeout('Timeout requesting image'));
-					} else {
+					var imageGm = gm(path);
+					processor(req.params.operations, imageGm).then(handleImageComplete).catch(handleImageError);
+
+					function handleImageError(e) {
 						next(e);
 					}
-				}
 
-				function handleImageComplete(context) {
+					function handleImageComplete(context) {
 
-					timers.stop('process');
+						timers.stop('process');
 
-					// If the client requested just the data, return it as JSON.
-					// Otherwise stream the image back to the client.
-					if ('undefined' !== typeof req.query.data) {
-						res.json({
-							timers: timers,
-							operations: context.operationsRawData || null
-						});
-					} else if (context.image) {
-
-						// Set the cache time for the response.
-
-						var cacheMatches  = (responseHeaders['cache-control'] || '').match(/max-age=([0-9]+)/i) || { };
-						var cacheResponse = +(cacheMatches[1] || 0);
-						var cacheClient   = clientConfig.cache     || { };
-						var cacheGlobal   = config.cache           || { };
-						var cacheDefault  = cacheClient.ttlDefault || cacheGlobal.ttlDefault || 2592000;
-						var cacheMin      = cacheClient.ttlMin     || cacheGlobal.ttlMin     || 3600;
-						var cacheMax      = cacheClient.ttlMax     || cacheGlobal.ttlMax     || 2592000;
-						var cacheFinal    = Math.max(cacheMin, Math.min(cacheMax, cacheResponse || cacheDefault));
-
-						res.set('Cache-Control', 'max-age=' + cacheFinal);
-
-						// Set the content type to the mime type specified by a format operation
-						// or the response header content-type or based on the image URL file extension.
-						var contentType =
-							context.mime ||
-							responseHeaders['content-type'] ||
-							mime(req.params.imageUrl);
-						if (contentType) {
-							res.set('content-type', contentType);
-						}
-
-						// Copy the response headers.
-						if (responseHeaders) {
-							responseHeadersToCopy.forEach(function (header) {
-								if (responseHeaders[header]) {
-									res.set(header, responseHeaders[header]);
-								}
+						// If the client requested just the data, return it as JSON.
+						// Otherwise stream the image back to the client.
+						if ('undefined' !== typeof req.query.data) {
+							res.json({
+								timers: timers,
+								operations: context.operationsRawData || null
 							});
+						} else if (context.image) {
+
+							// Set the cache time for the response.
+
+							var cacheMatches = (responseHeaders['cache-control'] || '').match(/max-age=([0-9]+)/i) || {};
+							var cacheResponse = +(cacheMatches[1] || 0);
+							var cacheClient = clientConfig.cache || {};
+							var cacheGlobal = config.cache || {};
+							var cacheDefault = cacheClient.ttlDefault || cacheGlobal.ttlDefault || 2592000;
+							var cacheMin = cacheClient.ttlMin || cacheGlobal.ttlMin || 3600;
+							var cacheMax = cacheClient.ttlMax || cacheGlobal.ttlMax || 2592000;
+							var cacheFinal = Math.max(cacheMin, Math.min(cacheMax, cacheResponse || cacheDefault));
+
+							res.set('Cache-Control', 'max-age=' + cacheFinal);
+
+							// Set the content type to the mime type specified by a format operation
+							// or the response header content-type or based on the image URL file extension.
+							var contentType =
+								context.mime ||
+								responseHeaders['content-type'] ||
+								mime.lookup(req.params.imageUrl);
+							if (contentType && contentType !== 'application/octet-stream') {
+								res.set('content-type', contentType);
+							}
+
+							// Copy the response headers.
+							if (responseHeaders) {
+								responseHeadersToCopy.forEach(function (header) {
+									if (responseHeaders[header]) {
+										res.set(header, responseHeaders[header]);
+									}
+								});
+							}
+
+							// Send the timers back as headers.
+							Object.keys(timers).forEach(function (timerKey) {
+								var millis = timers[timerKey].millis;
+								res.set('x-pointr-timer-' + timerKey, (millis === null ? '?' : millis));
+							});
+
+							context.image.stream()
+								.on('end', req.workComplete)
+								.on('close', req.workComplete)
+								.on('error', req.workComplete)
+								.pipe(res);
+
+						} else {
+							next(new errors.NoImageReturned('No image returned'));
 						}
-
-						// Send the timers back as headers.
-						Object.keys(timers).forEach(function (timerKey) {
-							var millis = timers[timerKey].millis;
-							res.set('x-pointr-timer-' + timerKey, (millis === null ? '?' : millis));
-						});
-
-						context.image.stream().pipe(res);
-
-					} else {
-						next(new errors.NoImageReturned('No image returned'));
 					}
 
-					req.workComplete();
-				}
-
-				imageReq.on('error', handleImageError);
-				processor(req.params.operations, imageGm).then(handleImageComplete).catch(handleImageError);
-
-			});
+				});
+			}
 		});
 	});
 
 	// Error handler.
 	app.use(function(err, req, res, next) {
 		if (!err.publicMessage) {
-			log.error(err.message || 'Unknown error', err);
+			log.error(err.message || 'Unknown error', { exception: err, stack: err.stack || null });
 		}
 		req.workComplete && req.workComplete();
 		res.status(err.statusCode || 500).json({
@@ -184,7 +187,5 @@ module.exports = function (worker) {
 		});
 	});
 
-	app.listen(port, function () {
-		log.info('[pointr-worker] ' + worker.id + ', port', app.get('port'));
-	});
+	app.listen(port);
 };

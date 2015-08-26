@@ -1,6 +1,6 @@
 {
   "name": "pointr",
-  "version": "2.8.0",
+  "version": "3.0.0",
   "author": "Ralph Khattar <ralph.khattar@gmail.com>",
   "license": "MIT",
   "scripts": {
@@ -20,6 +20,7 @@
     "ratelimiter": "^2.0.1",
     "redis": "^0.12.1",
     "request": "^2.55.0",
+    "tmp": "0.0.27",
     "winston": "^1.0.0"
   }
 }

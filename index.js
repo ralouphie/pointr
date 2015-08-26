@@ -12,6 +12,7 @@ var instances = Math.max(instancesMin, Math.min(instancesMax, cores));
 
 // Start clustered instances.
 if (cluster.isMaster) {
-	log.info('Starting pointr. Spawning ' + instances + ' instances...');
+	var port = config.port || 3000;
+	log.info('Starting pointr on port ' + port + '. Spawning ' + instances + ' instances.');
 }
 expressCluster(app, { count: instances });

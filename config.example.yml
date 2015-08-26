@@ -8,6 +8,9 @@ log:
   level: debug                # Log level
   disableAccessLogging: false # Whether to disable access logging
 
+# Optional. Defaults to the system temp directory.
+tempDir: /tmp
+
 # Optional. A list of valid hostnames for the service.
 # This is useful if you want to hide the origin hostname (e.g. s3cr3th0s1.example.com).
 validHostnames:
