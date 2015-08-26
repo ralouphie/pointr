@@ -40,9 +40,14 @@ module.exports = function (worker) {
 		res.status(200).end();
 	});
 
-	// Image processing route.
-	app.get(/^\/([a-zA-Z0-9_]+)(:[a-z0-9]+)?\/(.+)\/(https?:\/\/?.+)$/, function handleImageRequest(req, res, next) {
 
+	app.get(/^\/([a-zA-Z0-9_]+)(:[a-z0-9]+)?\/(.+)\/(https?:\/\/?.+)$/, handleImageRequest);
+	app.get(/^\/([a-zA-Z0-9_]+)(%3A[a-z0-9]+)?\/(.+)\/(https?%3A\/\/?.+)$/, handleImageRequest);
+
+		// Image processing route.
+	function handleImageRequest(req, res, next) {
+
+		req.url = req.url.replace(/%3A/g, ':');
 		req.params.client = req.params[0];
 		req.params.signature = (req.params[1] || '').replace(/^:/, '');
 		req.params.operations = req.params[2];
@@ -172,7 +177,7 @@ module.exports = function (worker) {
 				});
 			}
 		});
-	});
+	}
 
 	// Error handler.
 	app.use(function(err, req, res, next) {
