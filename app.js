@@ -109,7 +109,7 @@ module.exports = function (worker) {
 					timers.start('process');
 
 					var imageGm = gm(path);
-					processor(req.params.operations, imageGm).then(handleImageComplete).catch(handleImageError);
+					processor(req.params.operations, imageGm, path).then(handleImageComplete).catch(handleImageError);
 
 					function handleImageError(e) {
 						next(e);
