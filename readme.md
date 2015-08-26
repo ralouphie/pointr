@@ -32,6 +32,7 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |`log.colorize`|Optional. Defaults to `false`. Whether to color the log.|
 |`log.level`|Optional. Defaults to `debug`. The logging level.|
 |`log.disableAccessLogging`|Optional. Defaults to `false`. Whether to disable access logging.|
+|`tempDir`|Optional. Defaults to system temp dir. Where to put temporary images being processed.|
 |`validHostnames`|Optional. A list of valid host names the service will respond to.|
 |`instances.min`|Optional. Defaults to `16`. The minimum number of instances to start.|
 |`instances.max`|Optional. Defaults to `128`. The maximum number of instances to start.|
@@ -57,6 +58,9 @@ log:
   colorize: false             # Do not color the logs
   level: debug                # Log level
   disableAccessLogging: false # Whether to disable access logging
+
+# Optional. Defaults to the system temp directory.
+tempDir: /tmp
 
 # Optional. A list of valid hostnames for the service.
 # This is useful if you want to hide the origin hostname (e.g. s3cr3th0s1.example.com).
