@@ -201,5 +201,5 @@ module.exports = function (worker) {
 		});
 	});
 
-	app.listen(port);
+	return app.listen(port);
 };
