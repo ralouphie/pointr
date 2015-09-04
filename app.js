@@ -68,8 +68,8 @@ module.exports = function (worker) {
 				imageUrl = imageUrl.replace(/(https?):\/\/?/g, '$1://');
 			}
 		}
-		req.params.imageUrl = decodeURIComponent(imageUrl);
-		req.params.operations = decodeURIComponent(operations);
+		req.params.imageUrl = imageUrl;
+		req.params.operations = operations;
 
 		// Authorize the current request.
 		authorize(req, res, function (e) {
