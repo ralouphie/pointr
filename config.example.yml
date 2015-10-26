@@ -25,6 +25,12 @@ instances:
 # Optional. Timeout (in seconds) when requesting images.
 requestTimeout: 5
 
+# Optional. Image downloader configuration
+downloader:
+
+  # A user-agent header to use when downloading images.
+  userAgent: pointr
+
 # Recommended. The header to use for the end-client (browser) IP address.
 # This is necessary if this service is an origin,
 # fronted by a CDN that provides its own header for the client IP address.

@@ -37,6 +37,7 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |`instances.min`|Optional. Defaults to `16`. The minimum number of instances to start.|
 |`instances.max`|Optional. Defaults to `128`. The maximum number of instances to start.|
 |`requestTimeout`|Optional. Defaults to `5`. Timeout (in seconds) when requesting images.|
+|`downloader.userAgent`|Optional. Defaults to `pointr`. A user agent header string to use when downloading images.|
 |`cache.ttlDefault`|Recommended. Defaults to `2592000` (30 days). Cache time if cache control is not present in image response.|
 |`cache.ttlMin`|Recommended. Defaults to `3600` (one hour). Minimum cache time for the `Cache-Control` header.|
 |`cache.ttlMax`|Recommended. Defaults to `2592000` (30 days). Maximum cache time for the `Cache-Control` header.|
