@@ -1,4 +1,4 @@
-var express = require('express');
+	var express = require('express');
 var request = require('request');
 var mime = require('mime');
 var gm = require('gm');
@@ -80,7 +80,10 @@ module.exports = function (worker) {
 
 			var timers = new Timers();
 			var downloadOptions = {
-				timeout: 1000 * (config.requestTimeout || 5)
+				timeout: 1000 * (config.requestTimeout || 5),
+				headers: {
+					'User-Agent': (config.downloader && config.downloader.userAgent) || 'pointr'
+				}
 			};
 
 			timers.start('download');
