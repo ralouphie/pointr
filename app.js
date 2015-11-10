@@ -17,7 +17,7 @@ module.exports = function (worker) {
 	var app = express();
 	var downloader = require('./lib/downloader');
 	var processor = require('./lib/processor');
-	var workQueue = require('./lib/work-queue')(1);
+	var workQueue = require('./lib/work-queue')(15);
 
 	app.disable('x-powered-by');
 
