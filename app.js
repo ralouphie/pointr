@@ -40,35 +40,47 @@ module.exports = function (worker) {
 	});
 
 
-	app.get(/^\/([a-zA-Z0-9_]+)(:[a-z0-9]+)?\/(.+)\/(https?:\/\/?.+)$/, handleImageRequest);
+
+	app.get(/^\/([a-zA-Z0-9_]+)(:[a-z0-9]+)?\/(.+)\/(?!https?\:?)$/, function (req, res, next) {
+		req.clientAndOperations = req.path;
+		handleImageRequest(req, res, next);
+	});
+
+	app.get(/^\/([a-zA-Z0-9_]+)(:[a-z0-9]+)?\/(.+)\/(https?:\/\/?.+)$/, function (req, res, next) {
+		handleImageRequestTrailingUrl(req, res, next);
+	});
 
 	app.get(/^\/([a-zA-Z0-9_]+)(%3A[a-z0-9]+)?\/(.+)\/(https?%3A\/\/?.+)$/, function (req, res, next) {
 		req.url = req.url.replace(/%3A/g, ':');
-		handleImageRequest(req, res, next);
+		handleImageRequestTrailingUrl(req, res, next);
 	});
+
+	function handleImageRequestTrailingUrl(req, res, next) {
+		var imageUrlPos = req.path.substr(0).search(/https?:\//);
+		if (imageUrlPos > 0) {
+			req.query.url = req.path.substr(imageUrlPos);
+			req.clientAndOperations = req.path.substr(0, imageUrlPos);
+		}
+		handleImageRequest(req, res, next);
+	}
 
 		// Image processing route.
 	function handleImageRequest(req, res, next) {
 
+		if (!req.query.url) {
+			return next(new errors.MissingImageUrl("No image URL given"));
+		}
+		if (!req.clientAndOperations) {
+			return next(new errors.MissingOperations("Missing client and/or operations"));
+		}
+
+		var clientAndOperations = req.clientAndOperations.replace(/\/$/, '');
+		var firstSlashPos = req.clientAndOperations.indexOf('/', 1);
+		req.params.operations = clientAndOperations.substring(firstSlashPos + 1);
 		req.params.client = req.params[0];
 		req.params.signature = (req.params[1] || '').replace(/^:/, '');
+		req.params.imageUrl = req.query.url;
 
-		var clientConfig = (config.client && config.client[req.params.client]) || {};
-
-		// Use request URL to preserve query parameters stripped by Express.
-		var imageUrl = '';
-		var operations = '';
-		var imageUrlPos = req.url.substr(0).search(/https?:\/\/?/);
-		var firstSlashPos = req.url.indexOf('/', 1);
-		if (imageUrlPos) {
-			imageUrl = req.url.substr(imageUrlPos);
-			operations = req.url.substring(firstSlashPos + 1, imageUrlPos - 1);
-			if (imageUrl) {
-				imageUrl = imageUrl.replace(/(https?):\/\/?/g, '$1://');
-			}
-		}
-		req.params.imageUrl = imageUrl;
-		req.params.operations = operations;
 
 		// Authorize the current request.
 		authorize(req, res, function (e) {
@@ -77,6 +89,7 @@ module.exports = function (worker) {
 				return next(e);
 			}
 
+			var clientConfig = (config.client && config.client[req.params.client]) || {};
 			var timers = new Timers();
 			var downloadOptions = {
 				timeout: 1000 * (config.requestTimeout || 5),

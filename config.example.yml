@@ -19,7 +19,7 @@ validHostnames:
 # Optional. The number of pointr instances to run.
 # This will default to the number of CPUs on the system bounded by the min and max.
 instances:
-  min: 16
+  min: 2
   max: 64
 
 # Optional. Timeout (in seconds) when requesting images.

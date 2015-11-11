@@ -144,16 +144,17 @@ followed by a sequence of **operations**, followed by the **image URL** to manip
 
 The format looks like the following:
 
-`http://<pointr_service_host>/<client>[:<signature>]/<operation1>/<operation2>/.../<image_url>`
+`http://<pointr_service_host>/<client>[:<signature>]/<operation1>/<operation2>/.../?url=<url_encoded_image_url>`
 
 ### Signature
 
 To access the API through an safe client (one that uses a `secret`, see config above), you must generate a **signature**.
 
-To generate a security signature, you generate a SHA-1 HMAC (Hashed Message Authentication Code) of the operations followed by a slash `/`, followed by the image URL.
+To generate a security signature, you generate a SHA-1 HMAC (Hashed Message Authentication Code) of the portion of the
+URL that comes after the client and signature.
 
-Format: `<operation1>/<operation2>/.../<imageURL>`  
-Example: `thumb:300,300/flip:h/http://example.com/my-image.jpeg`
+Format: `<operation1>/<operation2>/.../?url<url_encoded_image_url>`
+Example: `thumb:300,300/flip:h/?url=http%3A%2F%2Fexample.com%2Fmy-image.jpeg`
 
 If the above string of operations and image URL is `message`, The algorithm looks like the following:
 
@@ -182,7 +183,7 @@ $signature = hash_hmac('sha1', $message, $clientSecret);
 
 Once the signature is computed, you can make requests using the client ID and signature in the URL:
 
-`http://<pointr_service_host>/<client>:<signature>/<operation1>/<operation2>/.../<image_url>`
+`http://<pointr_service_host>/<client>:<signature>/<operation1>/<operation2>/.../?url=<url_encoded_image_url>`
 
 
 ### Operations
