@@ -79,7 +79,7 @@ module.exports = function (worker) {
 		req.params.operations = clientAndOperations.substring(firstSlashPos + 1);
 		req.params.client = req.params[0];
 		req.params.signature = (req.params[1] || '').replace(/^:/, '');
-		req.params.imageUrl = req.query.url;
+		req.params.imageUrl = req.query.url.replace(/(https?):\/\/?([^\/])/i, '$1://$2');
 
 
 		// Authorize the current request.
