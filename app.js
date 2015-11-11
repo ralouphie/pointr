@@ -17,7 +17,6 @@ module.exports = function (worker) {
 	var app = express();
 	var downloader = require('./lib/downloader');
 	var processor = require('./lib/processor');
-	var workQueue = require('./lib/work-queue')(15);
 
 	app.disable('x-powered-by');
 
@@ -104,89 +103,80 @@ module.exports = function (worker) {
 				];
 
 				timers.stop('download');
-				timers.start('wait');
+				timers.start('process');
 
-				workQueue.post(function (work) {
+				req.workComplete = function () {
+					cleanup();
+				};
 
-					req.workComplete = function () {
-						cleanup();
-						req.workComplete = function () { };
-						work.complete();
-					};
+				var imageGm = gm(path);
+				processor(req.params.operations, imageGm, path).then(handleImageComplete).catch(handleImageError);
 
-					timers.stop('wait');
-					timers.start('process');
+				function handleImageError(e) {
+					next(e);
+				}
 
-					var imageGm = gm(path);
-					processor(req.params.operations, imageGm, path).then(handleImageComplete).catch(handleImageError);
+				function handleImageComplete(context) {
 
-					function handleImageError(e) {
-						next(e);
-					}
+					timers.stop('process');
 
-					function handleImageComplete(context) {
+					// If the client requested just the data, return it as JSON.
+					// Otherwise stream the image back to the client.
+					if ('undefined' !== typeof req.query.data) {
+						res.json({
+							timers: timers,
+							operations: context.operationsRawData || null
+						});
+					} else if (context.image) {
 
-						timers.stop('process');
+						// Set the cache time for the response.
 
-						// If the client requested just the data, return it as JSON.
-						// Otherwise stream the image back to the client.
-						if ('undefined' !== typeof req.query.data) {
-							res.json({
-								timers: timers,
-								operations: context.operationsRawData || null
-							});
-						} else if (context.image) {
+						var cacheMatches = (responseHeaders['cache-control'] || '').match(/max-age=([0-9]+)/i) || {};
+						var cacheResponse = +(cacheMatches[1] || 0);
+						var cacheClient = clientConfig.cache || {};
+						var cacheGlobal = config.cache || {};
+						var cacheDefault = cacheClient.ttlDefault || cacheGlobal.ttlDefault || 2592000;
+						var cacheMin = cacheClient.ttlMin || cacheGlobal.ttlMin || 3600;
+						var cacheMax = cacheClient.ttlMax || cacheGlobal.ttlMax || 2592000;
+						var cacheFinal = Math.max(cacheMin, Math.min(cacheMax, cacheResponse || cacheDefault));
 
-							// Set the cache time for the response.
+						res.set('Cache-Control', 'max-age=' + cacheFinal);
 
-							var cacheMatches = (responseHeaders['cache-control'] || '').match(/max-age=([0-9]+)/i) || {};
-							var cacheResponse = +(cacheMatches[1] || 0);
-							var cacheClient = clientConfig.cache || {};
-							var cacheGlobal = config.cache || {};
-							var cacheDefault = cacheClient.ttlDefault || cacheGlobal.ttlDefault || 2592000;
-							var cacheMin = cacheClient.ttlMin || cacheGlobal.ttlMin || 3600;
-							var cacheMax = cacheClient.ttlMax || cacheGlobal.ttlMax || 2592000;
-							var cacheFinal = Math.max(cacheMin, Math.min(cacheMax, cacheResponse || cacheDefault));
-
-							res.set('Cache-Control', 'max-age=' + cacheFinal);
-
-							// Set the content type to the mime type specified by a format operation
-							// or the response header content-type or based on the image URL file extension.
-							var contentType =
-								context.mime ||
-								responseHeaders['content-type'] ||
-								mime.lookup(req.params.imageUrl);
-							if (contentType && contentType !== 'application/octet-stream') {
-								res.set('content-type', contentType);
-							}
-
-							// Copy the response headers.
-							if (responseHeaders) {
-								responseHeadersToCopy.forEach(function (header) {
-									if (responseHeaders[header]) {
-										res.set(header, responseHeaders[header]);
-									}
-								});
-							}
-
-							// Send the timers back as headers.
-							Object.keys(timers).forEach(function (timerKey) {
-								var millis = timers[timerKey].millis;
-								res.set('x-pointr-timer-' + timerKey, (millis === null ? '?' : millis));
-							});
-
-							context.image.stream()
-								.on('end', req.workComplete)
-								.on('close', req.workComplete)
-								.on('error', req.workComplete)
-								.pipe(res);
-
-						} else {
-							next(new errors.NoImageReturned('No image returned'));
+						// Set the content type to the mime type specified by a format operation
+						// or the response header content-type or based on the image URL file extension.
+						var contentType =
+							context.mime ||
+							responseHeaders['content-type'] ||
+							mime.lookup(req.params.imageUrl);
+						if (contentType && contentType !== 'application/octet-stream') {
+							res.set('content-type', contentType);
 						}
-					}
 
-				});
+						// Copy the response headers.
+						if (responseHeaders) {
+							responseHeadersToCopy.forEach(function (header) {
+								if (responseHeaders[header]) {
+									res.set(header, responseHeaders[header]);
+								}
+							});
+						}
+
+						// Send the timers back as headers.
+						Object.keys(timers).forEach(function (timerKey) {
+							var millis = timers[timerKey].millis;
+							res.set('x-pointr-timer-' + timerKey, (millis === null ? '?' : millis));
+						});
+
+						context.image.stream()
+							.on('end', req.workComplete)
+							.on('close', req.workComplete)
+							.on('error', req.workComplete)
+							.pipe(res);
+
+					} else {
+						next(new errors.NoImageReturned('No image returned'));
+					}
+				}
 			}
 		});
 	}

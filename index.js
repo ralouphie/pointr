@@ -6,7 +6,7 @@ var config = require('./lib/config');
 
 // Determine the number of instances to run.
 var cores = require('os').cpus().length;
-var instancesMin = (config.instances && config.instances.min) || 16;
+var instancesMin = (config.instances && config.instances.min) || 2;
 var instancesMax = (config.instances && config.instances.max) || 128;
 var instances = Math.max(instancesMin, Math.min(instancesMax, cores));
 

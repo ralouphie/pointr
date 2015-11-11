@@ -34,7 +34,7 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |`log.disableAccessLogging`|Optional. Defaults to `false`. Whether to disable access logging.|
 |`tempDir`|Optional. Defaults to system temp dir. Where to put temporary images being processed.|
 |`validHostnames`|Optional. A list of valid host names the service will respond to.|
-|`instances.min`|Optional. Defaults to `16`. The minimum number of instances to start.|
+|`instances.min`|Optional. Defaults to `2`. The minimum number of instances to start.|
 |`instances.max`|Optional. Defaults to `128`. The maximum number of instances to start.|
 |`requestTimeout`|Optional. Defaults to `5`. Timeout (in seconds) when requesting images.|
 |`downloader.userAgent`|Optional. Defaults to `pointr`. A user agent header string to use when downloading images.|
@@ -71,7 +71,7 @@ validHostnames:
 # Optional. The number of pointr instances to run.
 # This will default to the number of CPUs on the system bounded by the min and max.
 instances:
-  min: 16
+  min: 2
   max: 64
 
 # Optional. Timeout (in seconds) when requesting images.
