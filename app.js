@@ -39,7 +39,7 @@ module.exports = function (worker) {
 		res.status(200).end();
 	});
 
-
+	app.use('/static', express.static('static'));
 
 	app.get(/^\/([a-zA-Z0-9_]+)(:[a-z0-9]+)?\/(.+)\/(?!https?\:?)$/, function (req, res, next) {
 		req.clientAndOperations = req.path;
