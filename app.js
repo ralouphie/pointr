@@ -20,6 +20,10 @@ module.exports = function (worker) {
 
 	app.disable('x-powered-by');
 
+	if (typeof config.trustProxy !== 'undefined') {
+		app.set('trust proxy', config.trustProxy);
+	}
+
 	app.set('port', port);
 
 	// Logging middleware.
