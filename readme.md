@@ -42,6 +42,9 @@ Pointr uses a config file to control all options. See `config.example.yml` as an
 |`cache.ttlMin`|Recommended. Defaults to `3600` (one hour). Minimum cache time for the `Cache-Control` header.|
 |`cache.ttlMax`|Recommended. Defaults to `2592000` (30 days). Maximum cache time for the `Cache-Control` header.|
 |`trustProxy`|Optional. The `trust proxy` setting fot the express server.|
+|`errors.blankImages.enabled`|Optional. Defaults to false. Whether to return blank images in error cases.|
+|`errors.blankImages.ttl`|Optional. Defaults to 30 seconds. The blank image TTL in seconds.|
+|`errors.blankImages.statusCode`|Optional. Defaults to 204. The status code for blank images.|
 |`ipHeader`|Recommended. The header to use for the end-client (browser) IP address.|
 |`rateLimiter`|Recommended. A rate limiter to use. See `config.example.yml` for an example.|
 |`clients`|Required. The set of clients that will be using the service. See `config.example.yml` for an example.|
