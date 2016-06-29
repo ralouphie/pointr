@@ -10,6 +10,7 @@ var config = require('./lib/config');
 var Timers = require('./lib/timers');
 var authorize = require('./lib/authorize');
 var log = require('./lib/log');
+var blankImage = require('./lib/blank-image');
 
 module.exports = function (worker) {
 
@@ -84,7 +85,6 @@ module.exports = function (worker) {
 		req.params.client = req.params[0];
 		req.params.signature = (req.params[1] || '').replace(/^:/, '');
 		req.params.imageUrl = req.query.url.replace(/(https?):\/\/?([^\/])/i, '$1://$2');
-
 
 		// Authorize the current request.
 		authorize(req, res, function (e) {
@@ -200,15 +200,32 @@ module.exports = function (worker) {
 
 	// Error handler.
 	app.use(function(err, req, res, next) {
+		err = err || {};
 		if (!err.publicMessage) {
 			log.error(err.message || 'Unknown error', { exception: err, stack: err.stack || null });
 		}
+
 		req.workComplete && req.workComplete();
-		res.status(err.statusCode || 500).json({
-			error: true,
-			errorType: err.type || null,
-			errorMessage: err.publicMessage || 'Internal Server Error'
-		});
+
+		res.set('x-pointr-error-type', err.type || 'Unknown');
+		res.set('x-pointr-error-message', err.publicMessage || 'Unknown');
+
+		var configErrors = config.errors || {};
+		var configErrorsBlankImages = configErrors.blankImages || {};
+		if (configErrorsBlankImages.enabled) {
+			var ttl = configErrorsBlankImages.ttl || 30;
+			var statusCode = configErrorsBlankImages.statusCode || 204;
+			res.status(statusCode);
+			res.set('Cache-Control', 'public, max-age=' + ttl);
+			res.set('Content-Type', 'image/png');
+			res.end(blankImage, 'binary');
+		} else {
+			res.status(err.statusCode || 500).json({
+				error: true,
+				errorType: err.type || null,
+				errorMessage: err.publicMessage || 'Internal Server Error'
+			});
+		}
 	});
 
 	return app.listen(port);

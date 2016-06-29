@@ -11,7 +11,19 @@ log:
 # Optional. Defaults to the system temp directory.
 tempDir: /tmp
 
+# Optional. Defaults to false. Whether to trust the X-Forwarded-For header. Uses express.js options.
 trustProxy: true
+
+# Configuration for errors.
+errors:
+  # Configuration for blank images in error cases.
+  blankImages:
+    # Optional. Defaults to false. Whether to return blank images in error cases.
+    enabled: true
+    # Optional. Defaults to 30 seconds. The blank image TTL in seconds.
+    ttl: 30
+    # Optional. Defaults to 204. The status code for blank images.
+    statusCode: 204
 
 # Optional. A list of valid hostnames for the service.
 # This is useful if you want to hide the origin hostname (e.g. s3cr3th0s1.example.com).
@@ -40,7 +52,7 @@ downloader:
 ipHeader: True-Client-IP
 
 # How long to cache images. This will set the cache control header for the CDN.
-cache: 
+cache:
   ttlDefault: 2592000   # Default to 30 days (2592000 seconds).
   ttlMin: 3600          # Minimum 1 hour (3600 seconds).
   ttlMax: 2592000       # Maximum 30 days (2592000 seconds).
