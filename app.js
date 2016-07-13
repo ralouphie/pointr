@@ -126,7 +126,7 @@ module.exports = function (worker) {
 					cleanup();
 				};
 
-				var imageGm = gm(path);
+				var imageGm = gm(path).noProfile();
 				processor(req.params.operations, imageGm, path).then(handleImageComplete).catch(handleImageError);
 
 				function handleImageError(e) {
